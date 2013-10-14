@@ -971,7 +971,7 @@ HTML_COLORSTYLE_SAT    = 135
 # so 80 represents a gamma of 0.8, The value 220 represents a gamma of 2.2, 
 # and 100 does not change the gamma.
 
-HTML_COLORSTYLE_GAMMA  = 40
+HTML_COLORSTYLE_GAMMA  = 100
 
 # If the HTML_TIMESTAMP tag is set to YES then the footer of each generated HTML 
 # page will contain the date and time when the page was generated. Setting 
@@ -1305,7 +1305,7 @@ EXTRA_SEARCH_MAPPINGS  =
 # If the GENERATE_LATEX tag is set to YES (the default) Doxygen will 
 # generate Latex output.
 
-GENERATE_LATEX         = NO
+GENERATE_LATEX         = TES
 
 # The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put. 
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 
@@ -1370,7 +1370,7 @@ LATEX_EXTRA_FILES      =
 # contain links (just like the HTML output) instead of page references 
 # This makes the output suitable for online browsing using a pdf viewer.
 
-PDF_HYPERLINKS         = NO
+PDF_HYPERLINKS         = YES
 
 # If the USE_PDFLATEX tag is set to YES, pdflatex will be used instead of 
 # plain latex in the generated Makefile. Set this option to YES to get a 
@@ -1396,7 +1396,7 @@ LATEX_HIDE_INDICES     = NO
 # Note that which sources are shown also depends on other settings 
 # such as SOURCE_BROWSER.
 
-LATEX_SOURCE_CODE      = NO
+LATEX_SOURCE_CODE      = YES
 
 # The LATEX_BIB_STYLE tag can be used to specify the style to use for the 
 # bibliography, e.g. plainnat, or ieeetr. The default style is "plain". See 
