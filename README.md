@@ -1,4 +1,4 @@
-Hydrogen Framework - Asset Store Package
+Hydrogen Framework
 ================================================================================================
 
 This is the 'current' Unity Asset Store package which is available for free on the Asset Store.
