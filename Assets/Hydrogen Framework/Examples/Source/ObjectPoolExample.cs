@@ -47,6 +47,5 @@ public class ObjectPoolExample : MonoBehaviour {
 		hObjectPool.Instance.Spawn(
 			Random.Range(0, _poolIDs.Length),
 			gameObject.transform.position, Random.rotation);
-			
 	}
 }
