@@ -28,6 +28,7 @@
 using UnityEngine;
 using System.Collections;
 
+[AddComponentMenu("")]
 public class ObjectPoolExample : MonoBehaviour {
 	
 	private int[] _poolIDs;

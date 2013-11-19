@@ -152,6 +152,8 @@ PlayerSettings:
   spritePackerPolicy: 
   scriptingDefineSymbols:
     0: "J\x01"
+    4: 
+    7: 
   metroPackageName: Hydrogen
   metroPackageLogo: 
   metroPackageVersion: 
