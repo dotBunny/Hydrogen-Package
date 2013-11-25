@@ -1,3 +1,6 @@
 [submodule "Hydrogen"]
 path = Assets/Hydrogen Framework/Hydrogen
 url = https://github.com/dotBunny/Hydrogen.git
+[submodule "Website"]
+	path = Website
+	url = https://github.com/dotBunny/Hydrogen.git

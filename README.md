@@ -1,9 +1,9 @@
 Hydrogen Framework
 ================================================================================================
 
-This is the 'current' Unity Asset Store package which is available for free on the Asset Store.
+This is the "parent" project to the Hydrogen Framework. It contains the extras that are included 
+in the free Unity Asset Store package, as well as some other useful things.
 
-We've made it available here as well for the sake of having the examples we've included be 
-available through GIT as well.
+We've made it available here as well for the sake of having everything open and transparent.
 
 Please visit http://github.com/dotBunny/Hydrogen/ for the actual project.
