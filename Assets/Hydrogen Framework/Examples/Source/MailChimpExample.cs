@@ -39,31 +39,43 @@ public class MailChimpExample : MonoBehaviour {
 	private string _response = "";
 
 
-	public void MailChimpCallback(int hash, string response)
+	public void MailChimpCallback(int hash, System.Collections.Hashtable responseHeaders, string responseText)
 	{
-		_response = hash.ToString() + ": " + response;
+		_response = "CALL HASH: " + hash.ToString() + "\n\r\n\r";
+
+		string headers = "HEADERS\n\r========\n\r\n\r";
+		foreach (string s in responseHeaders.Keys)
+		{
+			headers += s + ": " + responseHeaders[s] + "\n\r";
+		}
+		_response += headers;
+		_response += "\n\rRESPONSE TEXT: \n\r==============\n\r" + responseText;
+		 
 	}
 
 	void OnGUI()
 	{
 		_emailAddress = GUI.TextField(new Rect(25,25, 150, 25), _emailAddress);
 
-		if ( GUI.Button(new Rect(25, 60, 75, 20), "Submit") )
+		if ( GUI.Button(new Rect(25, 60, 90, 20), "Subscribe") )
 		{
-			Dictionary<string, string> data = new Dictionary<string, string>();
+			Hydrogen.Serialization.JSONObject jsonPayload = new Hydrogen.Serialization.JSONObject();
 
-			data.Add("apikey", apiKey);
-			data.Add("id", listID);
-			data.Add("email", _emailAddress);
+			// Initial Setup
+			jsonPayload.fields.Add("apikey", apiKey);
+			jsonPayload.fields.Add("id", listID);
+
+			// Lazy sub object
+			jsonPayload.fields.Add("email", new Hydrogen.Serialization.JSONObject("{\"email\":\"" + _emailAddress + "\"}"));
 
 			hWebPool.Instance.POST(
 				"https://" +  apiKey.Substring(apiKey.LastIndexOf('-') + 1) + ".api.mailchimp.com/2.0/lists/subscribe.json",
 				"application/json",
-				Hydrogen.Serialization.JSON.Serialize(data),
+				jsonPayload.serialized,
 				null,
 				MailChimpCallback);
 		}
-		GUI.Label(new Rect(25,100, 500, 500), _response);
+		GUI.Label(new Rect(25,90, 500, 500), _response);
 
 	}
 }
