@@ -46,7 +46,7 @@ public class InputExample : MonoBehaviour
 
 		}
 
-		if ( GUI.Button(new Rect(340, 10, 150, 30), "Set Controls"))
+		if ( GUI.Button(new Rect(330, 10, 150, 30), "Set Controls"))
 		{
 			hInput.Instance.SetControls(Hydrogen.Serialization.INI.Deserialize(_fileHolder, '='));
 		}
