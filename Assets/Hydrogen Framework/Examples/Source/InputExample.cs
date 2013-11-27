@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using Hydrogen;
 
 public class InputExample : MonoBehaviour
@@ -9,6 +10,7 @@ public class InputExample : MonoBehaviour
 	public GameObject muzzle;
 	public GameObject[] ammo;
 
+	private string _fileHolder;
 
 	void Awake()
 	{
@@ -19,29 +21,54 @@ public class InputExample : MonoBehaviour
 		hInput.Instance.AddAction("Move", OnMove);
 		hInput.Instance.AddAction("Turn", OnTurn);
 		hInput.Instance.AddAction("Rotate", OnRotate);
-		hInput.Instance.AddAction("Shoot", OnShoot);
+		//hInput.Instance.AddAction("Shoot", OnShoot);
 		
 		hInput.Instance.AddControl("Mouse X", "Rotate");
 		hInput.Instance.AddControl("Horizontal", "Turn");
 		hInput.Instance.AddControl("Vertical", "Move");
-		hInput.Instance.AddControl("Left", "Shoot");
-		hInput.Instance.AddControl("Space", "Shoot");
-	}
+		//hInput.Instance.AddControl("Left", "Shoot");
+		//hInput.Instance.AddControl("Space", "Shoot");
+
 	
+
+	}
+
+	public void OnGUI()
+	{
+		if ( GUI.Button(new Rect(10,10,150, 30), "Save Config"))
+		{
+			_fileHolder = Hydrogen.Serialization.INI.Serialize(hInput.Instance.GetControls());
+		}
+
+		if ( GUI.Button(new Rect(170, 10, 150, 30), "Clear Controls"))
+		{
+			hInput.Instance.ClearControls();
+
+		}
+
+		if ( GUI.Button(new Rect(340, 10, 150, 30), "Set Controls"))
+		{
+			hInput.Instance.SetControls(Hydrogen.Serialization.INI.Deserialize(_fileHolder, '='));
+		}
+
+		GUI.color = Color.black;
+		GUI.Label(new Rect(10,40,500,500), "INI Data\n\r" + _fileHolder);
+	}
+
 	private void OnRotate(Hydrogen.Peripherals.InputEvent evt, float value, float time)
 	{
 		// Mouse X Axes are relative movements only. So we only turn the turret - never directly set the rotation.
 		turret.transform.localRotation *= Quaternion.AngleAxis(value * 180.0f * Time.deltaTime, Vector3.up);
 	}
 	
-	private void OnShoot(Hydrogen.Peripherals.InputEvent evt, float value, float time)
-	{
-		if (evt == Hydrogen.Peripherals.InputEvent.Released)
-		{
+	//private void OnShoot(Hydrogen.Peripherals.InputEvent evt, float value, float time)
+	//{
+	//	if (evt == Hydrogen.Peripherals.InputEvent.Released)
+	//	{
 		//	GameObject shell = Instantiate(ammo, muzzle.transform.position, Quaternion.identity) as GameObject;
 		//	shell.rigidbody.velocity = turret.transform.rotation * Vector3.forward * 10.0f * (time * time + 0.1f);
-		}
-	}
+	//	}
+	//}
 	
 	private void OnMove(Hydrogen.Peripherals.InputEvent evt, float value, float time)
 	{

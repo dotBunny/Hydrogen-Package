@@ -9,8 +9,8 @@ public class HydrogenSerializationTest {
 	private string _processed;
 
 
-	private Dictionary<string,string> _expectedData; 
-	private Dictionary<string,string> _processedData;
+	private List<KeyValuePair<string, string>> _expectedData; 
+	private List<KeyValuePair<string, string>> _processedData;
 	private bool _check;
 	
 	#region Hydrogen.Serialization.INI
@@ -22,12 +22,14 @@ public class HydrogenSerializationTest {
 
 		_processedData = Hydrogen.Serialization.INI.Deserialize(_file.ToString(), '=');
 	
-		_expectedData = new Dictionary<string, string>();
-		_expectedData.Add("Key", "Value");
+		_expectedData = new List<KeyValuePair<string, string>>();
+		_expectedData.Add(new KeyValuePair<string, string>("Key", "Value"));
 
-		if ( _expectedData.IsDictionaryEqual(_processedData) ) _check = true;
 
-		NUnit.Framework.Assert.AreEqual(true, _check, "Hydrogen.Serialization.INI.DeserializeOneLine");
+		NUnit.Framework.Assert.AreEqual(
+			true, 
+			Hydrogen.Validate.ScrambledEquals(_expectedData, _processedData), 
+			"Hydrogen.Serialization.INI.DeserializeOneLine");
 	}
 
 	[NUnit.Framework.TestAttribute]
@@ -36,8 +38,8 @@ public class HydrogenSerializationTest {
 		_file = new System.Text.StringBuilder();
 		_file.AppendLine("Key=Value");
 
-		_expectedData = new Dictionary<string, string>();
-		_expectedData.Add("Key", "Value");
+		_expectedData = new List<KeyValuePair<string, string>>();
+		_expectedData.Add(new KeyValuePair<string, string>("Key", "Value"));
 		
 		_processed = Hydrogen.Serialization.INI.Serialize(_expectedData, '=');
 
