@@ -43,7 +43,6 @@ public class HydrogenSerializationTest {
 		
 		_processed = Hydrogen.Serialization.INI.Serialize(_expectedData, '=');
 
-
 		NUnit.Framework.Assert.AreEqual(_file.ToString(), _processed, "Hydrogen.Serialization.INI.SerializeOneLine");
 	}
 

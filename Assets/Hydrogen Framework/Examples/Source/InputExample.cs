@@ -1,36 +1,72 @@
-﻿using System;
+﻿#region Copyright Notice & License Information
+// 
+// InputExample.cs
+//  
+// Author:
+//   Matthew Davey <matthew.davey@dotbunny.com>
+//
+// Copyright (c) 2013 dotBunny Inc. (http://www.dotbunny.com)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#endregion
+
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Hydrogen;
 
+/// <summary>
+/// Input Example.
+/// </summary>
+[AddComponentMenu("")]
 public class InputExample : MonoBehaviour
 {
-	public GameObject turret;
-	public GameObject muzzle;
+
+	public GameObject towerObject;
+	public GameObject spawnPoint;
 	public GameObject[] ammo;
 
 	private string _fileHolder;
-
-	void Awake()
-	{
-	}
+	private int[] prefabIDs;
+	
 
 	void Start()
 	{
+		// Make sure array is sized properly to hold the reference IDs. 
+		prefabIDs = new int[ammo.Length];
+
+		// Add Objects to Pool
+		for ( int x = 0; x < ammo.Length; x++ )
+		{
+			prefabIDs[x] = hObjectPool.Instance.Add(ammo[x]);
+		}
+
 		hInput.Instance.AddAction("Move", OnMove);
 		hInput.Instance.AddAction("Turn", OnTurn);
 		hInput.Instance.AddAction("Rotate", OnRotate);
-		//hInput.Instance.AddAction("Shoot", OnShoot);
+		hInput.Instance.AddAction("Shoot", OnShoot);
 		
 		hInput.Instance.AddControl("Mouse X", "Rotate");
 		hInput.Instance.AddControl("Horizontal", "Turn");
 		hInput.Instance.AddControl("Vertical", "Move");
-		//hInput.Instance.AddControl("Left", "Shoot");
-		//hInput.Instance.AddControl("Space", "Shoot");
-
-	
-
+		hInput.Instance.AddControl("Left", "Shoot");
+		hInput.Instance.AddControl("Space", "Shoot");
 	}
 
 	public void OnGUI()
@@ -58,23 +94,25 @@ public class InputExample : MonoBehaviour
 	private void OnRotate(Hydrogen.Peripherals.InputEvent evt, float value, float time)
 	{
 		// Mouse X Axes are relative movements only. So we only turn the turret - never directly set the rotation.
-		turret.transform.localRotation *= Quaternion.AngleAxis(value * 180.0f * Time.deltaTime, Vector3.up);
+		towerObject.transform.localRotation *= Quaternion.AngleAxis(value * 180.0f * Time.deltaTime, Vector3.up);
 	}
 	
-	//private void OnShoot(Hydrogen.Peripherals.InputEvent evt, float value, float time)
-	//{
-	//	if (evt == Hydrogen.Peripherals.InputEvent.Released)
-	//	{
-		//	GameObject shell = Instantiate(ammo, muzzle.transform.position, Quaternion.identity) as GameObject;
-		//	shell.rigidbody.velocity = turret.transform.rotation * Vector3.forward * 10.0f * (time * time + 0.1f);
-	//	}
-	//}
+	private void OnShoot(Hydrogen.Peripherals.InputEvent evt, float value, float time)
+	{
+		if (evt == Hydrogen.Peripherals.InputEvent.Released)
+		{
+			GameObject shell = hObjectPool.Instance.Spawn(prefabIDs[UnityEngine.Random.Range(0, prefabIDs.Length)], 
+			                                              spawnPoint.transform.position,  Quaternion.identity);
+
+			shell.rigidbody.velocity = spawnPoint.transform.rotation * Vector3.forward * 250.0f * (time * time + 0.1f);
+		}
+	}
 	
 	private void OnMove(Hydrogen.Peripherals.InputEvent evt, float value, float time)
 	{
 		// Vertical Axes give it's state of absolute values of -1.0, 1.0 only.
 		// So this is used to move the box along it's looking direction (horizontal). This will handle forward and backward movement in one go.
-		transform.transform.position += (transform.rotation * transform.forward) * value * 4.0f * Time.deltaTime;
+		transform.transform.position += (transform.TransformDirection(Vector3.left) * value * 10.0f) * Time.deltaTime;
 	}
 	
 	private void OnTurn(Hydrogen.Peripherals.InputEvent evt, float value, float time)

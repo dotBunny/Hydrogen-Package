@@ -5,7 +5,7 @@
 // Author:
 //   Matthew Davey <matthew.davey@dotbunny.com>
 //
-// Copyright (C) 2013 dotBunny Inc. (http://www.dotbunny.com)
+// Copyright (c) 2013 dotBunny Inc. (http://www.dotbunny.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -28,23 +28,40 @@
 using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Object Pool Example
+/// </summary>
 [AddComponentMenu("")]
 public class ObjectPoolExample : MonoBehaviour {
-	
-	private int[] _poolIDs;
+
+	/// <summary>
+	/// Prefab array to use with the spawner.
+	/// </summary>
 	public GameObject[] prefabs;
-	
-	// Use this for initialization
+
+	/// <summary>
+	/// An internal reference to keep track of relevant pool IDs.
+	/// </summary>
+	private int[] _poolIDs;
+
+
+	/// <summary>
+	/// Unity's Start Event
+	/// </summary>
 	void Start () {
 		
 		// Add all of our prefabs to the Object Pool
 		_poolIDs = hObjectPool.Instance.Add(prefabs);	
 	}
 	
-	// Update is called once per frame
+	/// <summary>
+	/// Unity's Update Event
+	/// </summary>
 	void Update () {
-		
-		// This returns a GameObject reference to the spawned GameObject.
+
+		// Spawn a GameObject (randomly) from the reference array. We could have 
+		// passed a GameObject instead, but this method is faster. This will also 
+		// return a reference to the newly spawned GameObject.
 		hObjectPool.Instance.Spawn(
 			Random.Range(0, _poolIDs.Length),
 			gameObject.transform.position, Random.rotation);
