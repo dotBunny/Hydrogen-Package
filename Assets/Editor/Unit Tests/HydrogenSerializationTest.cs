@@ -25,7 +25,6 @@ public class HydrogenSerializationTest {
 		_expectedData = new List<KeyValuePair<string, string>>();
 		_expectedData.Add(new KeyValuePair<string, string>("Key", "Value"));
 
-
 		NUnit.Framework.Assert.AreEqual(
 			true, 
 			Hydrogen.Validate.ScrambledEquals(_expectedData, _processedData), 
