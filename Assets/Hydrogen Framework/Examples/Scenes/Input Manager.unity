@@ -268,9 +268,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 220ac956c0e95498ca89222c26895e1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  towerObject: {fileID: 1410070501}
-  spawnPoint: {fileID: 287706372}
-  ammo:
+  TowerObject: {fileID: 1410070501}
+  SpawnPoint: {fileID: 287706372}
+  Ammo:
   - {fileID: 100000, guid: 34d6d443f5b804cf6abea9596a479c1d, type: 2}
   - {fileID: 100000, guid: 639d9f251383d4f7eaf94bee50305cc1, type: 2}
   - {fileID: 100000, guid: 1cd33e07536224d83aacbf77e94fd338, type: 2}
