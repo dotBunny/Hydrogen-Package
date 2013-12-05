@@ -356,13 +356,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e5347e8cd5a04971aa0beec56b10b9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultPreloadAmount: 20
-  defaultSpawnMore: 1
-  defaultSendMessage: 0
-  defaultHandleParticles: 1
-  defaultTrackSpawnedObjects: 1
-  defaultCullExtras: 1
-  objectPools: []
+  DefaultPreloadAmount: 5
+  DefaultSpawnMore: 1
+  DefaultSendMessage: 0
+  DefaultHandleParticles: 1
+  DefaultTrackSpawnedObjects: 0
+  DefaultCullExtras: 0
+  DefaultCullInterval: 3
+  ObjectPools: []
 --- !u!1 &1552533600
 GameObject:
   m_ObjectHideFlags: 0
