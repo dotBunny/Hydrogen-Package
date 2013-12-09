@@ -364,6 +364,7 @@ MonoBehaviour:
   DefaultCullExtras: 0
   DefaultCullInterval: 3
   ObjectPools: []
+  Presistant: 1
 --- !u!1 &1552533600
 GameObject:
   m_ObjectHideFlags: 0

@@ -30,7 +30,8 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Mail Chimp Example
+/// An example of how to use the Web Pool system to create a JSON call to Mail Chimp to add a new email address
+/// to an already created list.
 /// </summary>
 [AddComponentMenu ("")]
 public class MailChimpExample : MonoBehaviour
@@ -43,31 +44,31 @@ public class MailChimpExample : MonoBehaviour
 		/// </remarks>
 		public string ApiKey = "";
 		/// <summary>
-		/// The list mini hash ID
+		/// The list mini hash ID.
 		/// </summary>
 		/// <remarks>
 		/// https://admin.mailchimp.com/lists/settings/defaults?id=<somenumericid>
 		/// </remarks>
 		public string ListID = "";
 		/// <summary>
-		/// Default Email Address to use in the example
+		/// The API's region code.
+		/// </summary>
+		string _apiRegion = "";
+		/// <summary>
+		/// Default Email Address to use in the example.
 		/// </summary>
 		string _emailAddress = "sample@sample.com";
 		/// <summary>
-		/// Storage for on screen displayed textual response
+		/// Storage for on screen displayed textual response.
 		/// </summary>
 		string _response = "";
-		/// <summary>
-		/// The API's region
-		/// </summary>
-		string _apiRegion = "";
 
 		/// <summary>
 		/// Callback function, called when WebPoolWorker is finished.
 		/// </summary>
-		/// <param name="hash">Call Hash</param>
-		/// <param name="responseHeaders">Web Response Haders</param>
-		/// <param name="responseText">Web Response Payload</param>
+		/// <param name="hash">Call Hash.</param>
+		/// <param name="responseHeaders">Web Response Haders.</param>
+		/// <param name="responseText">Web Response Payload.</param>
 		public void MailChimpCallback (int hash, Hashtable responseHeaders, string responseText)
 		{
 				// Display the hash of our call
@@ -85,9 +86,9 @@ public class MailChimpExample : MonoBehaviour
 		}
 
 		/// <summary>
-		/// Unity's OnGUI Event
+		/// Unity's OnGUI Event.
 		/// </summary>
-		public void OnGUI ()
+		void OnGUI ()
 		{
 				// Display Email Address
 				_emailAddress = GUI.TextField (new Rect (25, 25, 150, 25), _emailAddress);

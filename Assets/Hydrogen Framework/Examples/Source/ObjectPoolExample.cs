@@ -29,7 +29,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Object Pool Example
+/// An example of how to use the Object Pool in a quick drop in manner. There are many ways to use the object pool
+/// some more effiencient then others.
 /// </summary>
 [AddComponentMenu ("")]
 public class ObjectPoolExample : MonoBehaviour
@@ -44,7 +45,7 @@ public class ObjectPoolExample : MonoBehaviour
 		int[] _poolIDs;
 
 		/// <summary>
-		/// Unity's Start Event
+		/// Unity's Start Event.
 		/// </summary>
 		public void Start ()
 		{
@@ -53,11 +54,10 @@ public class ObjectPoolExample : MonoBehaviour
 		}
 
 		/// <summary>
-		/// Unity's Update Event
+		/// Unity's Update Event.
 		/// </summary>
 		public void Update ()
 		{
-
 				// Spawn a GameObject (randomly) from the reference array. We could have passed a GameObject instead,
 				// but this method is faster. This will also return a reference to the newly spawned GameObject.
 				hObjectPool.Instance.Spawn (
