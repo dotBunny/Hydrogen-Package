@@ -318,53 +318,6 @@ Light:
   m_ShadowAngle: 0
   m_IndirectIntensity: 1
   m_AreaSize: {x: 1, y: 1}
---- !u!1 &1134100900
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 1134100901}
-  - 114: {fileID: 1134100902}
-  m_Layer: 0
-  m_Name: Object Pool
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1134100901
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1134100900}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.89137506, y: 22.1848373, z: 6.16967773}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
---- !u!114 &1134100902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1134100900}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e5347e8cd5a04971aa0beec56b10b9f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DefaultPreloadAmount: 5
-  DefaultSpawnMore: 1
-  DefaultSendMessage: 0
-  DefaultHandleParticles: 1
-  DefaultTrackSpawnedObjects: 0
-  DefaultCullExtras: 0
-  DefaultCullInterval: 3
-  ObjectPools: []
-  Presistant: 1
 --- !u!1 &1552533600
 GameObject:
   m_ObjectHideFlags: 0

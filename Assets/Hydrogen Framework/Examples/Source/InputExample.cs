@@ -37,6 +37,10 @@ using UnityEngine;
 public class InputExample : MonoBehaviour
 {
 		/// <summary>
+		/// Display the GUI part of the example.
+		/// </summary>
+		public bool DisplayGUI = true;
+		/// <summary>
 		/// The ammo used by our examples tank.
 		/// </summary>
 		public GameObject[] Ammo;
@@ -68,6 +72,10 @@ public class InputExample : MonoBehaviour
 		/// </summary>
 		void OnGUI ()
 		{
+				// If we dont want to display GUI, don't!
+				if (!DisplayGUI)
+						return;
+
 				// Serialize the current config, and save it to our fake file
 				if (GUI.Button (new Rect (10, 10, 150, 30), "Save Config")) {
 						_fileHolder = Hydrogen.Serialization.INI.Serialize (hInput.Instance.GetControls ());
