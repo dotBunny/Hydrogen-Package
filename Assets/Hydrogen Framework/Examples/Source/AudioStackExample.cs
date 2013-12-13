@@ -28,7 +28,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class AudioPoolExample : MonoBehaviour
+public class AudioStackExample : MonoBehaviour
 {
 		public AudioClip[] clips;
 
@@ -49,6 +49,6 @@ public class AudioPoolExample : MonoBehaviour
 
 
 				GUI.color = Color.black;
-				GUI.Label (new Rect (10, 50, 100, 35), "Active Sources: " + hAudioStack.Instance.UsedSources);
+				GUI.Label (new Rect (10, 50, 100, 35), "Active Sources: " + hAudioStack.Instance.SourcesCount);
 		}
 }
