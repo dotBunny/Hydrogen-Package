@@ -9,6 +9,10 @@ public class AmbientAudioTester : MonoBehaviour
 		public AmbientAudioManager.ChunkAudioItem inside1;
 		public AmbientAudioManager.ChunkAudioItem inside2;
 		public Color TestColor;
+		public float RainIntensity = 0f;
+		public float WindIntensity = 0f;
+		public float ThunderIntensity = 0f;
+		// TODO MAKE TESTER FOR INTENSITIEs
 		AmbientAudioManager _manager;
 		string _activeChunk;
 		string _activeInside;
@@ -22,7 +26,16 @@ public class AmbientAudioTester : MonoBehaviour
 				_manager.StructureSettings = inside1;
 				_activeInside = "inside1";
 		}
-
+		/*
+		 * The normal operation of this would be something like the following, whenver you want to pass a simple color update
+		 * 
+		 *     _manager.UpdateStackVolumes(color);
+		 * 
+		 * Lets say you change chunks and want to update the settings
+		 *    
+		 *     _manager.ChunkAudioSettings = AmbientAudioManager.UpdateChunkAudioSettingsVolumes(yourNewSettingsChunk, yourColor);
+		 * 
+		 */
 		void OnGUI ()
 		{
 				if (GUI.Button (new Rect (10, 10, 100, 30), "Daytime")) {
@@ -43,6 +56,10 @@ public class AmbientAudioTester : MonoBehaviour
 
 				if (GUI.Button (new Rect (120, 50, 100, 30), "Outside")) {
 						_manager.IsInsideStructure = false;
+				}
+
+				if (GUI.Button (new Rect (230, 50, 100, 30), "Push Color")) {
+						_manager.UpdateStackVolumes (TestColor);
 				}
 
 				if (GUI.Button (new Rect (10, Screen.height - 40, 100, 30), "Chunk 1")) {

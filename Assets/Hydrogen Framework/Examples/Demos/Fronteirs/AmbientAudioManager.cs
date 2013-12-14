@@ -29,11 +29,6 @@ public class AmbientAudioManager : MonoBehaviour
 		 */
 		public float FadeInTime = 4.0f;
 		public float FadeOutTime = 5.0f;
-		public float RainIntensity = 0f;
-		float _currentRainIntensity;
-		float _previousRainIntensity;
-		bool _updatedRainIntensity;
-		public float WindIntensity = 0f;
 		/// <summary>
 		/// The current ChunkAudioSettings to be used.
 		/// </summary>
@@ -54,6 +49,18 @@ public class AmbientAudioManager : MonoBehaviour
 		/// Living in a world inside of walls?
 		/// </summary>
 		bool _isInsideStructure;
+		/// <summary>
+		/// Rain Intensity
+		/// </summary>
+		float _intensityRain = 1f;
+		/// <summary>
+		/// Thunder Intensity
+		/// </summary>
+		float _intensityThunder = 1f;
+		/// <summary>
+		/// Wind Intensity
+		/// </summary>
+		float _intensityWind = 1f;
 		//public ChunkAudioItem UpdateChunkAudio
 		/// <summary>
 		/// Gets or sets the current ChunkAudioSettings.
@@ -130,6 +137,28 @@ public class AmbientAudioManager : MonoBehaviour
 										    && hAudioStack.Instance.IsPlaying (ChunkSettings.AgNightOpen.Key)) {
 												UpdateFlagBased (false, ChunkSettings.AgNightOpen.Key, null, 0f);
 										}
+
+										if (!string.IsNullOrEmpty (ChunkSettings.Rain.Key) &&
+										    ChunkSettings.Rain.Key != value.Rain.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.Rain.Key)) {
+												UpdateFlagBased (false, ChunkSettings.Rain.Key, null, 0f);
+										}
+
+
+										if (!string.IsNullOrEmpty (ChunkSettings.Thunder.Key) &&
+										    ChunkSettings.Thunder.Key != value.Thunder.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.Thunder.Key)) {
+												UpdateFlagBased (false, ChunkSettings.Thunder.Key, null, 0f);
+										}
+
+
+										if (!string.IsNullOrEmpty (ChunkSettings.Wind.Key) &&
+										    ChunkSettings.Wind.Key != value.Wind.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.Wind.Key)) {
+												UpdateFlagBased (false, ChunkSettings.Wind.Key, null, 0f);
+										}
+
+							
 								}
 
 								if (value != null) {
@@ -195,6 +224,48 @@ public class AmbientAudioManager : MonoBehaviour
 										}
 								}
 								_chunkSettings = value;
+
+								if (_chunkSettings != null) {
+										_chunkSettings.Wind.BaseVolume = _chunkSettings.Wind.TargetVolume;
+										_chunkSettings.Rain.BaseVolume = _chunkSettings.Rain.TargetVolume;
+										_chunkSettings.Thunder.BaseVolume = _chunkSettings.Thunder.TargetVolume;
+
+										_chunkSettings.Thunder.TargetVolume = _chunkSettings.Thunder.BaseVolume * _intensityThunder;
+
+										if (_chunkSettings.Thunder.TargetVolume > 0 &&
+										    !string.IsNullOrEmpty (ChunkSettings.Thunder.Key)) {
+
+												UpdateFlagBased (true,
+														ChunkSettings.Thunder.Key, 
+														Get (ChunkSettings.Thunder.Key), 
+														_chunkSettings.Thunder.TargetVolume);
+
+
+										}
+
+										_chunkSettings.Rain.TargetVolume = _chunkSettings.Rain.BaseVolume * _intensityRain;
+										if (_chunkSettings.Rain.TargetVolume > 0 &&
+										    !string.IsNullOrEmpty (ChunkSettings.Rain.Key)) {
+
+												UpdateFlagBased (true,
+														ChunkSettings.Rain.Key, 
+														Get (ChunkSettings.Rain.Key), 
+														_chunkSettings.Rain.TargetVolume);
+
+
+										}
+										_chunkSettings.Wind.TargetVolume = _chunkSettings.Wind.BaseVolume * _intensityWind;
+										if (_chunkSettings.Wind.TargetVolume > 0 &&
+										    !string.IsNullOrEmpty (ChunkSettings.Wind.Key)) {
+
+												UpdateFlagBased (true,
+														ChunkSettings.Wind.Key, 
+														Get (ChunkSettings.Wind.Key), 
+														_chunkSettings.Wind.TargetVolume);
+										}
+
+
+								}
 						}
 
 				}
@@ -224,6 +295,69 @@ public class AmbientAudioManager : MonoBehaviour
 
 								_structureSettings = value;
 						}
+				}
+		}
+
+		public float ThunderIntensity {
+				get { return _intensityThunder; }
+				set {
+						if (value != _intensityThunder) {
+								if (ChunkSettings != null && !string.IsNullOrEmpty (ChunkSettings.Thunder.Key)) {
+										ChunkSettings.Thunder.TargetVolume = ChunkSettings.Thunder.BaseVolume * _intensityThunder;
+										if (ChunkSettings.Thunder.TargetVolume > 0) {
+												UpdateFlagBased (true, 
+														ChunkSettings.Thunder.Key, 
+														Get (ChunkSettings.Thunder.Key), 
+														ChunkSettings.Thunder.TargetVolume);
+
+										} else {
+												UpdateFlagBased (false, ChunkSettings.Thunder.Key, null, 0f);
+										}
+								}
+						}
+
+				}
+		}
+
+		public float WindIntensity {
+				get { return _intensityWind; }
+				set {
+						if (value != _intensityWind) {
+								if (ChunkSettings != null && !string.IsNullOrEmpty (ChunkSettings.Wind.Key)) {
+										ChunkSettings.Wind.TargetVolume = ChunkSettings.Wind.BaseVolume * _intensityWind;
+										if (ChunkSettings.Wind.TargetVolume > 0) {
+												UpdateFlagBased (true, 
+														ChunkSettings.Wind.Key, 
+														Get (ChunkSettings.Wind.Key), 
+														ChunkSettings.Wind.TargetVolume);
+
+										} else {
+												UpdateFlagBased (false, ChunkSettings.Wind.Key, null, 0f);
+										}
+								}
+						}
+
+				}
+		}
+
+		public float RainIntensity {
+				get { return _intensityRain; }
+				set {
+						if (value != _intensityRain) {
+								if (ChunkSettings != null && !string.IsNullOrEmpty (ChunkSettings.Rain.Key)) {
+										ChunkSettings.Rain.TargetVolume = ChunkSettings.Wind.BaseVolume * _intensityRain;
+										if (ChunkSettings.Rain.TargetVolume > 0) {
+												UpdateFlagBased (true, 
+														ChunkSettings.Rain.Key, 
+														Get (ChunkSettings.Rain.Key), 
+														ChunkSettings.Rain.TargetVolume);
+
+										} else {
+												UpdateFlagBased (false, ChunkSettings.Rain.Key, null, 0f);
+										}
+								}
+						}
+
 				}
 		}
 
@@ -337,7 +471,28 @@ public class AmbientAudioManager : MonoBehaviour
 		/// <returns>The passed ChunkAudioSettings, updated from color.</returns>
 		/// <param name="settings">Target ChunkAudioSettings.</param>
 		/// <param name="color">Color values to use to determine volume levels.</param>
-		public static ChunkAudioSettings UpdateChunkAudioFromColor (ChunkAudioSettings settings, Color color)
+		public void UpdateStackVolumes (Color color)
+		{
+				ChunkSettings.AgDayCoastal.TargetVolume = color.r;
+				ChunkSettings.AgNightCoastal.TargetVolume = color.r;
+				ChunkSettings.UgShallow.TargetVolume = color.r;
+
+				ChunkSettings.AgDayForest.TargetVolume = color.r;
+				ChunkSettings.AgNightForested.TargetVolume = color.r;
+				ChunkSettings.UgDeep.TargetVolume = color.r;
+
+				ChunkSettings.AgDayCivilized.TargetVolume = color.r;
+				ChunkSettings.AgNightCivilized.TargetVolume = color.r;
+				ChunkSettings.UgEnclosed.TargetVolume = color.r;
+
+				ChunkSettings.AgDayOpen.TargetVolume = color.r;
+				ChunkSettings.AgNightOpen.TargetVolume = color.r;
+				ChunkSettings.UgOpen.TargetVolume = color.r;
+
+				PushVolumesToStack ();
+		}
+
+		public static ChunkAudioSettings UpdateChunkAudioSettingsVolumes (ChunkAudioSettings settings, Color color)
 		{
 				settings.AgDayCoastal.TargetVolume = color.r;
 				settings.AgNightCoastal.TargetVolume = color.r;
@@ -689,6 +844,7 @@ public class AmbientAudioManager : MonoBehaviour
 				} else if (flag && hAudioStack.Instance.IsPlaying (key)) {
 						hAudioStack.Instance.LoadedItems [key].TargetVolume = targetVolume;
 				} else if (flag && hAudioStack.Instance.IsLoaded (key)) {
+						hAudioStack.Instance.LoadedItems [key].TargetVolume = targetVolume;
 						hAudioStack.Instance.LoadedItems [key].Play ();
 				} else if (!flag && hAudioStack.Instance.IsLoaded (key)) {
 						hAudioStack.Instance.LoadedItems [key].TargetVolume = 0f;
@@ -720,6 +876,8 @@ public class AmbientAudioManager : MonoBehaviour
 		{
 				public string Key;
 				public float TargetVolume = 1f;
+				[System.NonSerialized]
+				public float BaseVolume;
 		}
 
 		[Serializable]
