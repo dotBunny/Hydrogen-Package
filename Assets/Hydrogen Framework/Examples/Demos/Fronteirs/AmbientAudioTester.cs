@@ -6,15 +6,21 @@ public class AmbientAudioTester : MonoBehaviour
 		public AmbientAudioManager.ChunkAudioSettings chunk1;
 		public AmbientAudioManager.ChunkAudioSettings chunk2;
 		public AmbientAudioManager.ChunkAudioSettings chunk3;
-		public Hydrogen.Core.AudioStackItem inside1;
-		public Hydrogen.Core.AudioStackItem inside2;
+		public AmbientAudioManager.ChunkAudioItem inside1;
+		public AmbientAudioManager.ChunkAudioItem inside2;
+		public Color TestColor;
 		AmbientAudioManager _manager;
+		string _activeChunk;
+		string _activeInside;
 		// Use this for initialization
 		void Start ()
 		{
 				_manager = GetComponent<AmbientAudioManager> ();
-				_manager.CurrentChunkAudio = chunk1;
-				_manager.CurrentStructureInteriorAudio = inside1;
+
+				_manager.ChunkSettings = chunk1;
+				_activeChunk = "chunk1";
+				_manager.StructureSettings = inside1;
+				_activeInside = "inside1";
 		}
 
 		void OnGUI ()
@@ -40,21 +46,33 @@ public class AmbientAudioTester : MonoBehaviour
 				}
 
 				if (GUI.Button (new Rect (10, Screen.height - 40, 100, 30), "Chunk 1")) {
-						_manager.CurrentChunkAudio = chunk1;
+						_manager.ChunkSettings = chunk1;
+						_activeChunk = "chunk1";
 				}
 				if (GUI.Button (new Rect (120, Screen.height - 40, 100, 30), "Chunk 2")) {
-						_manager.CurrentChunkAudio = chunk2;
+						_manager.ChunkSettings = chunk2;
+						_activeChunk = "chunk2";
 				}
 				if (GUI.Button (new Rect (230, Screen.height - 40, 100, 30), "Chunk 3")) {
-						_manager.CurrentChunkAudio = chunk3;
+						_manager.ChunkSettings = chunk3;
+						_activeChunk = "chunk3";
 				}
 				if (GUI.Button (new Rect (340, Screen.height - 40, 100, 30), "Inside 1")) {
-						_manager.CurrentStructureInteriorAudio = inside1;
+						_manager.StructureSettings = inside1;
+						_activeChunk = "inside1";
 				}
 				if (GUI.Button (new Rect (450, Screen.height - 40, 100, 30), "Inside 2")) {
-						_manager.CurrentStructureInteriorAudio = inside2;
+						_manager.StructureSettings = inside2;
+						_activeChunk = "inside2";
 				}
 
-				GUI.Label (new Rect (10, 120, 100, 35), "Active Sources: " + hAudioStack.Instance.SourcesCount);
+
+				GUI.Label (new Rect (10, 120, 200, 200), 
+						"Active Sources: " + hAudioStack.Instance.SourcesCount +
+						"\nIsDaytime: " + _manager.IsDaytime +
+						"\nIsUnderground: " + _manager.IsUnderground +
+						"\nIsInsideStructure: " + _manager.IsInsideStructure +
+						"\nActive Chunk: " + _activeChunk +
+						"\nActive Inside: " + _activeInside);
 		}
 }

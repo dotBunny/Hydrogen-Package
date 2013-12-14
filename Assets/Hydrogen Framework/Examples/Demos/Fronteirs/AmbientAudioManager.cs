@@ -7,11 +7,17 @@ using UnityEngine;
 /// </summary>
 public class AmbientAudioManager : MonoBehaviour
 {
-		public AudioClip[] demoBank;
+		/* Simple Emulation for the internal Mod Class used in the game*/
+		public AudioClip[] DemoBank;
 
 		public AudioClip Get (string key)
 		{
-				return demoBank [Convert.ToInt32 (key)];
+				if (string.IsNullOrEmpty (key)) {
+						Debug.Log ("Key Not Set");
+						return null;
+				} else {
+						return DemoBank [Convert.ToInt32 (key)];
+				}
 		}
 		/*
 		 * Create a look up table to simulate mod (get clip by string)
@@ -28,23 +34,14 @@ public class AmbientAudioManager : MonoBehaviour
 		float _previousRainIntensity;
 		bool _updatedRainIntensity;
 		public float WindIntensity = 0f;
-		public float ThunderIntensity = 0f;
-		/// <summary>
-		/// Was the color changed?
-		/// </summary>
-		bool _colorUpdated;
-		/// <summary>
-		/// The current color.
-		/// </summary>
-		Color _currentColor = Color.black;
 		/// <summary>
 		/// The current ChunkAudioSettings to be used.
 		/// </summary>
-		ChunkAudioSettings _currentChunkAudio;
+		ChunkAudioSettings _chunkSettings;
 		/// <summary>
 		/// The current StructureInteriorAudio to be used.
 		/// </summary>
-		Hydrogen.Core.AudioStackItem _currentStructureInteriorAudio;
+		ChunkAudioItem _structureSettings;
 		/// <summary>
 		/// Is it daytime?
 		/// </summary>
@@ -57,90 +54,147 @@ public class AmbientAudioManager : MonoBehaviour
 		/// Living in a world inside of walls?
 		/// </summary>
 		bool _isInsideStructure;
-		/// <summary>
-		/// The previous ChunkAudioSettings to be used.
-		/// </summary>
-		ChunkAudioSettings _previousChunkAudio;
-		/// <summary>
-		/// The previous color.
-		/// </summary>
-		Color _previousColor = Color.black;
-		/// <summary>
-		/// The current StructureInteriorAudio to be used.
-		/// </summary>
-		Hydrogen.Core.AudioStackItem _previousStructureInteriorAudio;
-		Hydrogen.Core.AudioStackItem _structureItem;
-		/// <summary>
-		/// Was any of the audio chunk information updated recently?
-		/// </summary>
-		bool _updatedChunkAudio;
-		/// <summary>
-		/// Was the daytime changed?
-		/// </summary>
-		bool _updatedDaytime;
-		/// <summary>
-		/// Was the inside structure status changed?
-		/// </summary>
-		bool _updatedInsideStructure;
-		/// <summary>
-		/// Was the structures audio settings updated?
-		/// </summary>
-		bool _updatedStructureInteriorAudio;
-		/// <summary>
-		/// Was the underground status changed?
-		/// </summary>
-		bool _updatedUnderground;
-
-		public Color CurrentColor {
-				get {
-						return _currentColor;
-				}
-				set {
-						if (value != _currentColor) {
-
-								CurrentChunkAudio.AgDayCoastal.TargetVolume = value.r;
-								CurrentChunkAudio.AgNightCoastal.TargetVolume = value.r;
-								CurrentChunkAudio.UgShallow.TargetVolume = value.r;
-
-								CurrentChunkAudio.AgDayForest.TargetVolume = value.r;
-								CurrentChunkAudio.AgNightForested.TargetVolume = value.r;
-								CurrentChunkAudio.UgDeep.TargetVolume = value.r;
-
-								CurrentChunkAudio.AgDayCivilized.TargetVolume = value.r;
-								CurrentChunkAudio.AgNightCivilized.TargetVolume = value.r;
-								CurrentChunkAudio.UgEnclosed.TargetVolume = value.r;
-
-								CurrentChunkAudio.AgDayOpen.TargetVolume = value.r;
-								CurrentChunkAudio.AgNightOpen.TargetVolume = value.r;
-								CurrentChunkAudio.UgOpen.TargetVolume = value.r;
-
-								PushVolumesToStack ();
-
-								_colorUpdated = true;
-								_previousColor = _currentColor;
-								_currentColor = value;
-						}
-				}
-		}
-
+		//public ChunkAudioItem UpdateChunkAudio
 		/// <summary>
 		/// Gets or sets the current ChunkAudioSettings.
 		/// </summary>
 		/// <value>The current ChunkAudioSettings.</value>
-		public ChunkAudioSettings CurrentChunkAudio {
-				get { return _currentChunkAudio; }
+		public ChunkAudioSettings ChunkSettings {
+				get { return _chunkSettings; }
 				set { 
-						if (value != _currentChunkAudio) {
-								_updatedChunkAudio = true;
+						if (value != _chunkSettings) {
 
-								if (value == _previousChunkAudio) {
-										//TODO: Might want to handle this a bit cleaner
+								// Fade our old guys, but only if they are different then what were gonna be pushing
+								if (_chunkSettings != null) {
+
+										if (!string.IsNullOrEmpty (ChunkSettings.UgDeep.Key) &&
+										    ChunkSettings.UgDeep.Key != value.UgDeep.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.UgDeep.Key)) {
+												UpdateFlagBased (false, ChunkSettings.UgDeep.Key, null, 0f);
+										}
+										if (!string.IsNullOrEmpty (ChunkSettings.UgEnclosed.Key) &&
+										    ChunkSettings.UgEnclosed.Key != value.UgEnclosed.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.UgEnclosed.Key)) {
+												UpdateFlagBased (false, ChunkSettings.UgEnclosed.Key, null, 0f);
+										}
+										if (!string.IsNullOrEmpty (ChunkSettings.UgOpen.Key) &&
+										    ChunkSettings.UgOpen.Key != value.UgOpen.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.UgOpen.Key)) {
+												UpdateFlagBased (false, ChunkSettings.UgOpen.Key, null, 0f);
+										}
+										if (!string.IsNullOrEmpty (ChunkSettings.UgShallow.Key) &&
+										    ChunkSettings.UgShallow.Key != value.UgShallow.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.UgShallow.Key)) {
+												UpdateFlagBased (false, ChunkSettings.UgShallow.Key, null, 0f);
+										}
+
+												
+										if (!string.IsNullOrEmpty (ChunkSettings.AgDayCoastal.Key) &&
+										    ChunkSettings.AgDayCoastal.Key != value.AgDayCoastal.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.AgDayCoastal.Key)) {
+												UpdateFlagBased (false, ChunkSettings.AgDayCoastal.Key, null, 0f);
+										}
+										if (!string.IsNullOrEmpty (ChunkSettings.AgDayCivilized.Key) &&
+										    ChunkSettings.AgDayCivilized.Key != value.AgDayCivilized.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.AgDayCivilized.Key)) {
+												UpdateFlagBased (false, ChunkSettings.AgDayCivilized.Key, null, 0f);
+										}
+										if (!string.IsNullOrEmpty (ChunkSettings.AgDayForest.Key) &&
+										    ChunkSettings.AgDayForest.Key != value.AgDayForest.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.AgDayForest.Key)) {
+												UpdateFlagBased (false, ChunkSettings.AgDayForest.Key, null, 0f);
+										}
+										if (!string.IsNullOrEmpty (ChunkSettings.AgDayOpen.Key) &&
+										    ChunkSettings.AgDayOpen.Key != value.AgDayOpen.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.AgDayOpen.Key)) {
+												UpdateFlagBased (false, ChunkSettings.AgDayOpen.Key, null, 0f);
+										}
+							
+										if (!string.IsNullOrEmpty (ChunkSettings.AgNightCoastal.Key) &&
+										    ChunkSettings.AgNightCoastal.Key != value.AgNightCoastal.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.AgNightCoastal.Key)) {
+												UpdateFlagBased (false, ChunkSettings.AgNightCoastal.Key, null, 0f);
+										}
+										if (!string.IsNullOrEmpty (ChunkSettings.AgNightCivilized.Key) &&
+										    ChunkSettings.AgNightCivilized.Key != value.AgNightCivilized.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.AgNightCivilized.Key)) {
+												UpdateFlagBased (false, ChunkSettings.AgNightCivilized.Key, null, 0f);
+										}
+										if (!string.IsNullOrEmpty (ChunkSettings.AgNightForested.Key) &&
+										    ChunkSettings.AgNightForested.Key != value.AgNightForested.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.AgNightForested.Key)) {
+												UpdateFlagBased (false, ChunkSettings.AgNightForested.Key, null, 0f);
+										}
+										if (!string.IsNullOrEmpty (ChunkSettings.AgNightOpen.Key) &&
+										    ChunkSettings.AgNightOpen.Key != value.AgNightOpen.Key
+										    && hAudioStack.Instance.IsPlaying (ChunkSettings.AgNightOpen.Key)) {
+												UpdateFlagBased (false, ChunkSettings.AgNightOpen.Key, null, 0f);
+										}
 								}
 
+								if (value != null) {
+										if (_isUnderground) {
+												if (!string.IsNullOrEmpty (value.UgDeep.Key)) {
+														UpdateFlagBased (true, value.UgDeep.Key, 
+																Get (value.UgDeep.Key), value.UgDeep.TargetVolume);
+												}
 
+												if (!string.IsNullOrEmpty (value.UgEnclosed.Key)) {
+														UpdateFlagBased (true, value.UgEnclosed.Key, 
+																Get (value.UgEnclosed.Key), value.UgEnclosed.TargetVolume);
+												}
 
-								_previousChunkAudio = _currentChunkAudio;
-								_currentChunkAudio = value;
+												if (!string.IsNullOrEmpty (value.UgShallow.Key)) {
+														UpdateFlagBased (true, value.UgShallow.Key, 
+																Get (value.UgShallow.Key), value.UgShallow.TargetVolume);
+												}
+												if (!string.IsNullOrEmpty (value.UgOpen.Key)) {
+														UpdateFlagBased (true, value.UgOpen.Key, 
+																Get (value.UgOpen.Key), value.UgOpen.TargetVolume);
+												}
+											
+										} else if (!_isInsideStructure) {
+												if (_isDaytime) {
+														if (!string.IsNullOrEmpty (value.AgDayOpen.Key)) {
+																UpdateFlagBased (true, value.AgDayOpen.Key, 
+																		Get (value.AgDayOpen.Key), value.AgDayOpen.TargetVolume);
+														}
+
+														if (!string.IsNullOrEmpty (value.AgDayForest.Key)) {
+																UpdateFlagBased (true, value.AgDayForest.Key, 
+																		Get (value.AgDayForest.Key), value.AgDayForest.TargetVolume);
+														}
+
+														if (!string.IsNullOrEmpty (value.AgDayCoastal.Key)) {
+																UpdateFlagBased (true, value.AgDayCoastal.Key, 
+																		Get (value.AgDayCoastal.Key), value.AgDayCoastal.TargetVolume);
+														}
+
+														if (!string.IsNullOrEmpty (value.AgDayCivilized.Key)) {
+																UpdateFlagBased (true, value.AgDayCivilized.Key, 
+																		Get (value.AgDayCivilized.Key), value.AgDayCivilized.TargetVolume);
+														}
+												} else {
+														if (!string.IsNullOrEmpty (value.AgNightOpen.Key)) {
+																UpdateFlagBased (true, value.AgNightOpen.Key, 
+																		Get (value.AgNightOpen.Key), value.AgNightOpen.TargetVolume);
+														}
+														if (!string.IsNullOrEmpty (value.AgNightForested.Key)) {
+																UpdateFlagBased (true, value.AgNightForested.Key, 
+																		Get (value.AgNightForested.Key), value.AgNightForested.TargetVolume);
+														}
+														if (!string.IsNullOrEmpty (value.AgNightCoastal.Key)) {
+																UpdateFlagBased (true, value.AgNightCoastal.Key, 
+																		Get (value.AgNightCoastal.Key), value.AgNightCoastal.TargetVolume);
+														}
+														if (!string.IsNullOrEmpty (value.AgNightCivilized.Key)) {
+																UpdateFlagBased (true, value.AgNightCivilized.Key, 
+																		Get (value.AgNightCivilized.Key), value.AgNightCivilized.TargetVolume);
+														}
+												}
+										}
+								}
+								_chunkSettings = value;
 						}
 
 				}
@@ -150,17 +204,25 @@ public class AmbientAudioManager : MonoBehaviour
 		/// Gets or sets the current AmbientAudioSetting for structures.
 		/// </summary>
 		/// <value>The current structure AmbientAudioSetting</value>
-		public Hydrogen.Core.AudioStackItem CurrentStructureInteriorAudio {
-				get { return _currentStructureInteriorAudio; }
+		public ChunkAudioItem StructureSettings {
+				get { return _structureSettings; }
 				set { 
-						if (value != _currentStructureInteriorAudio) {
-								_updatedStructureInteriorAudio = true;
+						if (value != _structureSettings) {
 
-								if (value == _previousStructureInteriorAudio) {
-										//TODO: Might want to handle this a bit cleaner
+								if (_structureSettings != null) {
+										if (!string.IsNullOrEmpty (_structureSettings.Key) && hAudioStack.Instance.IsPlaying (_structureSettings.Key))
+												UpdateFlagBased (false, _structureSettings.Key, null, 0f);
 								}
-								_previousStructureInteriorAudio = _currentStructureInteriorAudio;
-								_currentStructureInteriorAudio = value;
+								// Turn off the old one
+
+								if (value != null) {
+										if (IsInsideStructure && !string.IsNullOrEmpty (value.Key)) {
+												UpdateFlagBased (true, value.Key, 
+														Get (value.Key), value.TargetVolume);
+										}
+								}
+
+								_structureSettings = value;
 						}
 				}
 		}
@@ -172,9 +234,15 @@ public class AmbientAudioManager : MonoBehaviour
 		public bool IsDaytime {
 				get { return _isDaytime; }
 				set {
+						if (ChunkSettings == null) {
+								Debug.Log ("No AboveGround (ChunkSettings) Ambience Settings Found");
+								_isDaytime = value;
+								return;
+						}
+
 						if (value != _isDaytime) {
 
-								if (!_isUnderground) {
+								if (!_isUnderground && !_isInsideStructure) {
 										if (value) {
 												ToggleAboveGroundDayAmbience (true);
 												ToggleAboveGroundNightAmbience (false);
@@ -184,8 +252,6 @@ public class AmbientAudioManager : MonoBehaviour
 										}
 
 								}
-
-								_updatedDaytime = true;
 								_isDaytime = value;
 						}
 				}
@@ -201,28 +267,26 @@ public class AmbientAudioManager : MonoBehaviour
 						if (value != _isInsideStructure) {
 
 								// Update Our Structure
-								ToggleStructureAmbience (value);
+								if (StructureSettings != null) {
+										ToggleStructureAmbience (value);
+								}
 
-								// Additional Effects (If we are not underground)
+								// Deal with Above Ground Sounds
 								if (!_isUnderground) {
-										ToggleAboveGroundEffects (!value);
-								}
-								// Turn On Above ground
-								if (!_isUnderground && !value) {
-										if (_isDaytime) {
-												ToggleAboveGroundDayAmbience (true);
-										} else {
-												ToggleAboveGroundNightAmbience (true);
-										}
-								}
 
-								if (_isUnderground && !value) {
+										ToggleAboveGroundEffects (!value);
+
+										if (_isDaytime) {
+												ToggleAboveGroundDayAmbience (!value);
+										} else {
+												ToggleAboveGroundNightAmbience (!value);
+										}
+								} else if (_isUnderground) {
 										// Turn on underground
-										ToggleUnderGroundAmbience (true);
+										ToggleUnderGroundAmbience (!value);
 								}
 
 								// Add turn on underground or aboveground
-								_updatedInsideStructure = true;
 								_isInsideStructure = value;
 						}
 				}
@@ -235,6 +299,11 @@ public class AmbientAudioManager : MonoBehaviour
 		public bool IsUnderground {
 				get { return _isUnderground; }
 				set {
+						if (ChunkSettings == null) {
+								Debug.Log ("No Underground (ChunkSettings) Ambience Settings Found");
+								_isUnderground = value;
+								return;
+						}
 						if (value != _isUnderground) {
 
 								ToggleUnderGroundAmbience (value);
@@ -257,232 +326,354 @@ public class AmbientAudioManager : MonoBehaviour
 										}
 										ToggleAboveGroundEffects (true);
 								}
-
-								_updatedUnderground = true;
 								_isUnderground = value;
 						}
 				}
 		}
 
+		/// <summary>
+		/// Updates an ChunkAudioSettings classes volume levels according to the passed color
+		/// </summary>
+		/// <returns>The passed ChunkAudioSettings, updated from color.</returns>
+		/// <param name="settings">Target ChunkAudioSettings.</param>
+		/// <param name="color">Color values to use to determine volume levels.</param>
+		public static ChunkAudioSettings UpdateChunkAudioFromColor (ChunkAudioSettings settings, Color color)
+		{
+				settings.AgDayCoastal.TargetVolume = color.r;
+				settings.AgNightCoastal.TargetVolume = color.r;
+				settings.UgShallow.TargetVolume = color.r;
+
+				settings.AgDayForest.TargetVolume = color.r;
+				settings.AgNightForested.TargetVolume = color.r;
+				settings.UgDeep.TargetVolume = color.r;
+
+				settings.AgDayCivilized.TargetVolume = color.r;
+				settings.AgNightCivilized.TargetVolume = color.r;
+				settings.UgEnclosed.TargetVolume = color.r;
+
+				settings.AgDayOpen.TargetVolume = color.r;
+				settings.AgNightOpen.TargetVolume = color.r;
+				settings.UgOpen.TargetVolume = color.r;
+
+				return settings;
+		}
+
 		void PushVolumesToStack ()
 		{
-				if (_isInsideStructure && hAudioStack.Instance.IsLoaded (CurrentStructureInteriorAudio.Key)) {
-						hAudioStack.Instance.LoadedItems [CurrentStructureInteriorAudio.Key].TargetVolume = 
-								CurrentStructureInteriorAudio.TargetVolume;
+				if (_isInsideStructure && hAudioStack.Instance.IsLoaded (StructureSettings.Key)) {
+						hAudioStack.Instance.LoadedItems [StructureSettings.Key].TargetVolume = 
+								StructureSettings.TargetVolume;
 
 				} else if (_isUnderground) {
 
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.UgDeep.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.UgDeep.Key].TargetVolume = 
-										CurrentChunkAudio.UgDeep.TargetVolume;
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.UgDeep.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.UgDeep.Key].TargetVolume = 
+										ChunkSettings.UgDeep.TargetVolume;
 						}
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.UgEnclosed.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.UgEnclosed.Key].TargetVolume = 
-										CurrentChunkAudio.UgEnclosed.TargetVolume;
-						}
-
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.UgOpen.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.UgOpen.Key].TargetVolume = 
-										CurrentChunkAudio.UgOpen.TargetVolume;
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.UgEnclosed.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.UgEnclosed.Key].TargetVolume = 
+										ChunkSettings.UgEnclosed.TargetVolume;
 						}
 
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.UgShallow.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.UgShallow.Key].TargetVolume = 
-										CurrentChunkAudio.UgShallow.TargetVolume;
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.UgOpen.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.UgOpen.Key].TargetVolume = 
+										ChunkSettings.UgOpen.TargetVolume;
+						}
+
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.UgShallow.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.UgShallow.Key].TargetVolume = 
+										ChunkSettings.UgShallow.TargetVolume;
 						}
 
 				} else if (_isDaytime) {
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.AgDayOpen.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.AgDayOpen.Key].TargetVolume = 
-										CurrentChunkAudio.AgDayOpen.TargetVolume;
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.AgDayOpen.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.AgDayOpen.Key].TargetVolume = 
+										ChunkSettings.AgDayOpen.TargetVolume;
 						}
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.AgDayForest.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.AgDayForest.Key].TargetVolume = 
-										CurrentChunkAudio.AgDayForest.TargetVolume;
-						}
-
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.AgDayCoastal.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.AgDayCoastal.Key].TargetVolume = 
-										CurrentChunkAudio.AgDayCoastal.TargetVolume;
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.AgDayForest.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.AgDayForest.Key].TargetVolume = 
+										ChunkSettings.AgDayForest.TargetVolume;
 						}
 
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.AgDayCivilized.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.AgDayCivilized.Key].TargetVolume = 
-										CurrentChunkAudio.AgDayCivilized.TargetVolume;
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.AgDayCoastal.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.AgDayCoastal.Key].TargetVolume = 
+										ChunkSettings.AgDayCoastal.TargetVolume;
+						}
+
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.AgDayCivilized.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.AgDayCivilized.Key].TargetVolume = 
+										ChunkSettings.AgDayCivilized.TargetVolume;
 						}
 				} else {
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.AgNightOpen.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.AgNightOpen.Key].TargetVolume = 
-										CurrentChunkAudio.AgNightOpen.TargetVolume;
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.AgNightOpen.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.AgNightOpen.Key].TargetVolume = 
+										ChunkSettings.AgNightOpen.TargetVolume;
 						}
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.AgNightForested.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.AgNightForested.Key].TargetVolume = 
-										CurrentChunkAudio.AgNightForested.TargetVolume;
-						}
-
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.AgNightCoastal.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.AgNightCoastal.Key].TargetVolume = 
-										CurrentChunkAudio.AgNightCoastal.TargetVolume;
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.AgNightForested.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.AgNightForested.Key].TargetVolume = 
+										ChunkSettings.AgNightForested.TargetVolume;
 						}
 
-						if (hAudioStack.Instance.IsLoaded (CurrentChunkAudio.AgNightCivilized.Key)) {
-								hAudioStack.Instance.LoadedItems [CurrentChunkAudio.AgNightCivilized.Key].TargetVolume = 
-										CurrentChunkAudio.AgNightCivilized.TargetVolume;
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.AgNightCoastal.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.AgNightCoastal.Key].TargetVolume = 
+										ChunkSettings.AgNightCoastal.TargetVolume;
+						}
+
+						if (hAudioStack.Instance.IsLoaded (ChunkSettings.AgNightCivilized.Key)) {
+								hAudioStack.Instance.LoadedItems [ChunkSettings.AgNightCivilized.Key].TargetVolume = 
+										ChunkSettings.AgNightCivilized.TargetVolume;
 						}
 				}
 		}
 
 		void ToggleAboveGroundDayAmbience (bool flag)
 		{
+
 				if (flag) {
-						UpdateFlagBased (flag,
-								CurrentChunkAudio.AgDayCoastal.Key, 
-								Get (CurrentChunkAudio.AgDayCoastal.Key), 
-								CurrentChunkAudio.AgDayCoastal.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgDayForest.Key, 
-								Get (CurrentChunkAudio.AgDayForest.Key), 
-								CurrentChunkAudio.AgDayForest.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgDayCivilized.Key, 
-								Get (CurrentChunkAudio.AgDayCivilized.Key), 
-								CurrentChunkAudio.AgDayCivilized.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgDayOpen.Key, 
-								Get (CurrentChunkAudio.AgDayOpen.Key), 
-								CurrentChunkAudio.AgDayOpen.TargetVolume);
+						if (!string.IsNullOrEmpty (ChunkSettings.AgDayCoastal.Key)) {
+								UpdateFlagBased (flag,
+										ChunkSettings.AgDayCoastal.Key, 
+										Get (ChunkSettings.AgDayCoastal.Key), 
+										ChunkSettings.AgDayCoastal.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.AgDayForest.Key)) {
+						
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgDayForest.Key, 
+										Get (ChunkSettings.AgDayForest.Key), 
+										ChunkSettings.AgDayForest.TargetVolume);
+						}
+
+
+
+						if (!string.IsNullOrEmpty (ChunkSettings.AgDayCivilized.Key)) {
+
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgDayCivilized.Key, 
+										Get (ChunkSettings.AgDayCivilized.Key), 
+										ChunkSettings.AgDayCivilized.TargetVolume);
+						}
+
+
+						if (!string.IsNullOrEmpty (ChunkSettings.AgDayOpen.Key)) {
+
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgDayOpen.Key, 
+										Get (ChunkSettings.AgDayOpen.Key), 
+										ChunkSettings.AgDayOpen.TargetVolume);
+						}
+
+					
+
 				} else {
-						UpdateFlagBased (flag,
-								CurrentChunkAudio.AgDayCoastal.Key, 
-								null, 
-								CurrentChunkAudio.AgDayCoastal.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgDayForest.Key, 
-								null, 
-								CurrentChunkAudio.AgDayForest.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgDayCivilized.Key, 
-								null, 
-								CurrentChunkAudio.AgDayCivilized.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgDayOpen.Key, 
-								null, 
-								CurrentChunkAudio.AgDayOpen.TargetVolume);
+						if (!string.IsNullOrEmpty (ChunkSettings.AgDayCoastal.Key)) {
+
+								UpdateFlagBased (flag,
+										ChunkSettings.AgDayCoastal.Key, 
+										null, 
+										ChunkSettings.AgDayCoastal.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.AgDayForest.Key)) {
+
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgDayForest.Key, 
+										null, 
+										ChunkSettings.AgDayForest.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.AgDayCivilized.Key)) {
+
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgDayCivilized.Key, 
+										null, 
+										ChunkSettings.AgDayCivilized.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.AgDayOpen.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgDayOpen.Key, 
+										null, 
+										ChunkSettings.AgDayOpen.TargetVolume);
+						}
+
+
 				}
 		}
 
 		void ToggleAboveGroundEffects (bool flag)
 		{
 				if (flag) {
-						UpdateFlagBased (flag, CurrentChunkAudio.Rain.Key, 
-								Get (CurrentChunkAudio.Rain.Key), 
-								CurrentChunkAudio.Rain.TargetVolume);
-						UpdateFlagBased (flag, CurrentChunkAudio.Thunder.Key, 
-								Get (CurrentChunkAudio.Thunder.Key), 
-								CurrentChunkAudio.Wind.TargetVolume);
-						UpdateFlagBased (flag, CurrentChunkAudio.Wind.Key, 
-								Get (CurrentChunkAudio.Wind.Key), 
-								CurrentChunkAudio.Wind.TargetVolume);
+						if (!string.IsNullOrEmpty (ChunkSettings.Rain.Key)) {
+								UpdateFlagBased (flag, ChunkSettings.Rain.Key, 
+										Get (ChunkSettings.Rain.Key), 
+										ChunkSettings.Rain.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.Thunder.Key)) {
+								UpdateFlagBased (flag, ChunkSettings.Thunder.Key, 
+										Get (ChunkSettings.Thunder.Key), 
+										ChunkSettings.Wind.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.Wind.Key)) {
+								UpdateFlagBased (flag, ChunkSettings.Wind.Key, 
+										Get (ChunkSettings.Wind.Key), 
+										ChunkSettings.Wind.TargetVolume);
+						}
+
 				} else {
-						UpdateFlagBased (flag, CurrentChunkAudio.Rain.Key, 
-								null, 
-								CurrentChunkAudio.Rain.TargetVolume);
-						UpdateFlagBased (flag, CurrentChunkAudio.Thunder.Key, 
-								null, 
-								CurrentChunkAudio.Wind.TargetVolume);
-						UpdateFlagBased (flag, CurrentChunkAudio.Wind.Key, 
-								null, 
-								CurrentChunkAudio.Wind.TargetVolume);
+						if (!string.IsNullOrEmpty (ChunkSettings.Rain.Key)) {
+								UpdateFlagBased (flag, ChunkSettings.Rain.Key, 
+										null, 
+										ChunkSettings.Rain.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.Thunder.Key)) {
+								UpdateFlagBased (flag, ChunkSettings.Thunder.Key, 
+										null, 
+										ChunkSettings.Wind.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.Wind.Key)) {
+								UpdateFlagBased (flag, ChunkSettings.Wind.Key, 
+										null, 
+										ChunkSettings.Wind.TargetVolume);
+						}
 				}
 		}
 
 		void ToggleAboveGroundNightAmbience (bool flag)
 		{
 				if (flag) {
-						UpdateFlagBased (flag,
-								CurrentChunkAudio.AgNightCoastal.Key, 
-								Get (CurrentChunkAudio.AgNightCoastal.Key), 
-								CurrentChunkAudio.AgNightCoastal.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgNightForested.Key, 
-								Get (CurrentChunkAudio.AgNightForested.Key), 
-								CurrentChunkAudio.AgNightForested.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgNightCivilized.Key, 
-								Get (CurrentChunkAudio.AgNightCivilized.Key), 
-								CurrentChunkAudio.AgNightCivilized.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgNightOpen.Key, 
-								Get (CurrentChunkAudio.AgNightOpen.Key), 
-								CurrentChunkAudio.AgNightOpen.TargetVolume);
+						if (!string.IsNullOrEmpty (ChunkSettings.AgNightCoastal.Key)) {
+								UpdateFlagBased (flag,
+										ChunkSettings.AgNightCoastal.Key, 
+										Get (ChunkSettings.AgNightCoastal.Key), 
+										ChunkSettings.AgNightCoastal.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.AgNightForested.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgNightForested.Key, 
+										Get (ChunkSettings.AgNightForested.Key), 
+										ChunkSettings.AgNightForested.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.AgNightCivilized.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgNightCivilized.Key, 
+										Get (ChunkSettings.AgNightCivilized.Key), 
+										ChunkSettings.AgNightCivilized.TargetVolume);
+						}
+
+						if (!string.IsNullOrEmpty (ChunkSettings.AgNightOpen.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgNightOpen.Key, 
+										Get (ChunkSettings.AgNightOpen.Key), 
+										ChunkSettings.AgNightOpen.TargetVolume);
+						}
+
 				} else {
-						UpdateFlagBased (flag,
-								CurrentChunkAudio.AgNightCoastal.Key, 
-								null, 
-								CurrentChunkAudio.AgNightCoastal.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgNightForested.Key, 
-								null, 
-								CurrentChunkAudio.AgNightForested.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgNightCivilized.Key, 
-								null, 
-								CurrentChunkAudio.AgNightCivilized.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.AgNightOpen.Key, 
-								null, 
-								CurrentChunkAudio.AgNightOpen.TargetVolume);
+						if (!string.IsNullOrEmpty (ChunkSettings.AgNightCoastal.Key)) {
+								UpdateFlagBased (flag,
+										ChunkSettings.AgNightCoastal.Key, 
+										null, 
+										ChunkSettings.AgNightCoastal.TargetVolume);
+						}
+						if (!string.IsNullOrEmpty (ChunkSettings.AgNightForested.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgNightForested.Key, 
+										null, 
+										ChunkSettings.AgNightForested.TargetVolume);
+						}
+						if (!string.IsNullOrEmpty (ChunkSettings.AgNightCivilized.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgNightCivilized.Key, 
+										null, 
+										ChunkSettings.AgNightCivilized.TargetVolume);
+						}
+						if (!string.IsNullOrEmpty (ChunkSettings.AgNightOpen.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.AgNightOpen.Key, 
+										null, 
+										ChunkSettings.AgNightOpen.TargetVolume);
+						}
 				}
 		}
 
 		void ToggleStructureAmbience (bool flag)
 		{
-				UpdateFlagBased (flag, CurrentStructureInteriorAudio.Key, 
-						CurrentStructureInteriorAudio.Clip,
-						CurrentStructureInteriorAudio.TargetVolume);
+				if (!string.IsNullOrEmpty (StructureSettings.Key)) {
+						UpdateFlagBased (flag, StructureSettings.Key, 
+								Get (StructureSettings.Key),
+								StructureSettings.TargetVolume);
+				}
 		}
 
 		void ToggleUnderGroundAmbience (bool flag)
 		{
 				if (flag) {
-						UpdateFlagBased (flag,
-								CurrentChunkAudio.UgShallow.Key, 
-								Get (CurrentChunkAudio.UgShallow.Key), 
-								CurrentChunkAudio.UgShallow.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.UgDeep.Key, 
-								Get (CurrentChunkAudio.UgDeep.Key), 
-								CurrentChunkAudio.UgDeep.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.UgDeep.Key, 
-								Get (CurrentChunkAudio.UgEnclosed.Key), 
-								CurrentChunkAudio.UgEnclosed.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.UgOpen.Key, 
-								Get (CurrentChunkAudio.UgOpen.Key), 
-								CurrentChunkAudio.UgOpen.TargetVolume);
+						if (!string.IsNullOrEmpty (ChunkSettings.UgShallow.Key)) {
+								UpdateFlagBased (flag,
+										ChunkSettings.UgShallow.Key, 
+										Get (ChunkSettings.UgShallow.Key), 
+										ChunkSettings.UgShallow.TargetVolume);
+						}
+						if (!string.IsNullOrEmpty (ChunkSettings.UgDeep.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.UgDeep.Key, 
+										Get (ChunkSettings.UgDeep.Key), 
+										ChunkSettings.UgDeep.TargetVolume);
+						}
+						if (!string.IsNullOrEmpty (ChunkSettings.UgEnclosed.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.UgDeep.Key, 
+										Get (ChunkSettings.UgEnclosed.Key), 
+										ChunkSettings.UgEnclosed.TargetVolume);
+						}
+						if (!string.IsNullOrEmpty (ChunkSettings.UgOpen.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.UgOpen.Key, 
+										Get (ChunkSettings.UgOpen.Key), 
+										ChunkSettings.UgOpen.TargetVolume);
+						}
 				} else {
-						UpdateFlagBased (flag,
-								CurrentChunkAudio.UgShallow.Key, 
-								null, 
-								CurrentChunkAudio.UgShallow.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.UgDeep.Key, 
-								null, 
-								CurrentChunkAudio.UgDeep.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.UgDeep.Key, 
-								null, 
-								CurrentChunkAudio.UgEnclosed.TargetVolume);
-						UpdateFlagBased (flag, 
-								CurrentChunkAudio.UgOpen.Key, 
-								null, 
-								CurrentChunkAudio.UgOpen.TargetVolume);
+						if (!string.IsNullOrEmpty (ChunkSettings.UgShallow.Key)) {
+								UpdateFlagBased (flag,
+										ChunkSettings.UgShallow.Key, 
+										null, 
+										ChunkSettings.UgShallow.TargetVolume);
+						}
+						if (!string.IsNullOrEmpty (ChunkSettings.UgDeep.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.UgDeep.Key, 
+										null, 
+										ChunkSettings.UgDeep.TargetVolume);
+						}
+						if (!string.IsNullOrEmpty (ChunkSettings.UgDeep.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.UgEnclosed.Key, 
+										null, 
+										ChunkSettings.UgEnclosed.TargetVolume);
+						}
+						if (!string.IsNullOrEmpty (ChunkSettings.UgOpen.Key)) {
+								UpdateFlagBased (flag, 
+										ChunkSettings.UgOpen.Key, 
+										null, 
+										ChunkSettings.UgOpen.TargetVolume);
+						}
 				}
 		}
 
 		void UpdateFlagBased (bool flag, string key, AudioClip clip, float targetVolume)
 		{
+				// Without the key we cannot do anything
+				if (string.IsNullOrEmpty (key)) {
+						return;
+				}
+
 				if (flag && !hAudioStack.Instance.IsLoaded (key)) {
 						var newAudio = new Hydrogen.Core.AudioStackItem (clip, key);
 
@@ -498,7 +689,7 @@ public class AmbientAudioManager : MonoBehaviour
 				} else if (flag && hAudioStack.Instance.IsPlaying (key)) {
 						hAudioStack.Instance.LoadedItems [key].TargetVolume = targetVolume;
 				} else if (flag && hAudioStack.Instance.IsLoaded (key)) {
-						hAudioStack.Instance.LoadedItems [key].Source.Play ();
+						hAudioStack.Instance.LoadedItems [key].Play ();
 				} else if (!flag && hAudioStack.Instance.IsLoaded (key)) {
 						hAudioStack.Instance.LoadedItems [key].TargetVolume = 0f;
 				}
