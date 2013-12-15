@@ -210,7 +210,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chunk1:
     AgDayCoastal:
-      Key: 1
+      Key: 
       TargetVolume: 1
     AgDayForest:
       Key: 
@@ -222,7 +222,7 @@ MonoBehaviour:
       Key: 
       TargetVolume: 1
     AgNightCoastal:
-      Key: 2
+      Key: 0
       TargetVolume: 1
     AgNightForested:
       Key: 
@@ -246,7 +246,7 @@ MonoBehaviour:
       Key: 
       TargetVolume: 1
     Rain:
-      Key: 
+      Key: 1
       TargetVolume: 1
     Wind:
       Key: 
@@ -268,7 +268,7 @@ MonoBehaviour:
       Key: 
       TargetVolume: 1
     AgNightCoastal:
-      Key: 2
+      Key: 0
       TargetVolume: .5
     AgNightForested:
       Key: 
@@ -292,8 +292,8 @@ MonoBehaviour:
       Key: 
       TargetVolume: 1
     Rain:
-      Key: 
-      TargetVolume: 1
+      Key: 1
+      TargetVolume: .5
     Wind:
       Key: 
       TargetVolume: 1

@@ -12,7 +12,6 @@ public class AmbientAudioTester : MonoBehaviour
 		public float RainIntensity = 0f;
 		public float WindIntensity = 0f;
 		public float ThunderIntensity = 0f;
-		// TODO MAKE TESTER FOR INTENSITIEs
 		AmbientAudioManager _manager;
 		string _activeChunk;
 		string _activeInside;
@@ -60,6 +59,9 @@ public class AmbientAudioTester : MonoBehaviour
 
 				if (GUI.Button (new Rect (230, 50, 100, 30), "Push Color")) {
 						_manager.UpdateStackVolumes (TestColor);
+				}
+				if (GUI.Button (new Rect (340, 50, 100, 30), "Push Rain")) {
+						_manager.RainIntensity = RainIntensity;
 				}
 
 				if (GUI.Button (new Rect (10, Screen.height - 40, 100, 30), "Chunk 1")) {

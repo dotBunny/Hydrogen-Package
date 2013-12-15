@@ -50,15 +50,15 @@ public class AmbientAudioManager : MonoBehaviour
 		/// <summary>
 		/// Rain Intensity
 		/// </summary>
-		float _intensityRain = 1f;
+		float _intensityRain;
 		/// <summary>
 		/// Thunder Intensity
 		/// </summary>
-		float _intensityThunder = 1f;
+		float _intensityThunder;
 		/// <summary>
 		/// Wind Intensity
 		/// </summary>
-		float _intensityWind = 1f;
+		float _intensityWind;
 		//public ChunkAudioItem UpdateChunkAudio
 		/// <summary>
 		/// Gets or sets the current ChunkAudioSettings.
@@ -302,7 +302,7 @@ public class AmbientAudioManager : MonoBehaviour
 				set {
 						if (value != _intensityThunder) {
 								if (ChunkSettings != null && !string.IsNullOrEmpty (ChunkSettings.Thunder.Key)) {
-										ChunkSettings.Thunder.TargetVolume = ChunkSettings.Thunder.BaseVolume * _intensityThunder;
+										ChunkSettings.Thunder.TargetVolume = ChunkSettings.Thunder.BaseVolume * value;
 										if (ChunkSettings.Thunder.TargetVolume > 0) {
 												UpdateFlagBased (true, 
 														ChunkSettings.Thunder.Key, 
@@ -325,7 +325,7 @@ public class AmbientAudioManager : MonoBehaviour
 				set {
 						if (value != _intensityWind) {
 								if (ChunkSettings != null && !string.IsNullOrEmpty (ChunkSettings.Wind.Key)) {
-										ChunkSettings.Wind.TargetVolume = ChunkSettings.Wind.BaseVolume * _intensityWind;
+										ChunkSettings.Wind.TargetVolume = ChunkSettings.Wind.BaseVolume * value;
 										if (ChunkSettings.Wind.TargetVolume > 0) {
 												UpdateFlagBased (true, 
 														ChunkSettings.Wind.Key, 
@@ -347,7 +347,7 @@ public class AmbientAudioManager : MonoBehaviour
 				set {
 						if (value != _intensityRain) {
 								if (ChunkSettings != null && !string.IsNullOrEmpty (ChunkSettings.Rain.Key)) {
-										ChunkSettings.Rain.TargetVolume = ChunkSettings.Wind.BaseVolume * _intensityRain;
+										ChunkSettings.Rain.TargetVolume = ChunkSettings.Wind.BaseVolume * value;
 										if (ChunkSettings.Rain.TargetVolume > 0) {
 												UpdateFlagBased (true, 
 														ChunkSettings.Rain.Key, 
