@@ -25,8 +25,8 @@ public class AmbientAudioManager : MonoBehaviour
 		 * 
 		 * 
 		 */
-		public float FadeInTime = 4.0f;
-		public float FadeOutTime = 5.0f;
+		public float FadeInSpeed = 0.5f;
+		public float FadeOutSpeed = 0.5f;
 		/// <summary>
 		/// The current ChunkAudioSettings to be used.
 		/// </summary>
@@ -193,6 +193,7 @@ public class AmbientAudioManager : MonoBehaviour
 														}
 
 														if (!string.IsNullOrEmpty (value.AgDayCoastal.Key)) {
+																Debug.Log ("Called");
 																UpdateFlagBased (true, value.AgDayCoastal.Key, 
 																		Get (value.AgDayCoastal.Key), value.AgDayCoastal.TargetVolume);
 														}
@@ -835,8 +836,9 @@ public class AmbientAudioManager : MonoBehaviour
 						// Settings On Interior Audio
 						newAudio.Loop = true;
 						newAudio.Fade = true;
-						newAudio.FadeInTime = FadeInTime;
-						newAudio.FadeOutTime = FadeOutTime;
+						newAudio.FadeInSpeed = FadeInSpeed;
+						newAudio.FadeOutSpeed = FadeOutSpeed;
+						newAudio.StartVolume = 0f;
 
 						// Add to Stack
 						hAudioStack.Instance.Add (newAudio);
