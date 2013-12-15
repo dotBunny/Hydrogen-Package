@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -15,9 +14,8 @@ public class AmbientAudioManager : MonoBehaviour
 				if (string.IsNullOrEmpty (key)) {
 						Debug.Log ("Key Not Set");
 						return null;
-				} else {
-						return DemoBank [Convert.ToInt32 (key)];
 				}
+				return DemoBank [Convert.ToInt32 (key)];
 		}
 		/*
 		 * Create a look up table to simulate mod (get clip by string)
@@ -316,6 +314,8 @@ public class AmbientAudioManager : MonoBehaviour
 								}
 						}
 
+						_intensityThunder = value;
+
 				}
 		}
 
@@ -335,6 +335,7 @@ public class AmbientAudioManager : MonoBehaviour
 												UpdateFlagBased (false, ChunkSettings.Wind.Key, null, 0f);
 										}
 								}
+								_intensityWind = value;
 						}
 
 				}
@@ -356,6 +357,7 @@ public class AmbientAudioManager : MonoBehaviour
 												UpdateFlagBased (false, ChunkSettings.Rain.Key, null, 0f);
 										}
 								}
+								_intensityRain = value;
 						}
 
 				}
@@ -466,10 +468,8 @@ public class AmbientAudioManager : MonoBehaviour
 		}
 
 		/// <summary>
-		/// Updates an ChunkAudioSettings classes volume levels according to the passed color
+		/// Updates the current ChunkAudioSettings classes volume levels according to the passed color
 		/// </summary>
-		/// <returns>The passed ChunkAudioSettings, updated from color.</returns>
-		/// <param name="settings">Target ChunkAudioSettings.</param>
 		/// <param name="color">Color values to use to determine volume levels.</param>
 		public void UpdateStackVolumes (Color color)
 		{
