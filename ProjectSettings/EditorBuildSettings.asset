@@ -6,4 +6,4 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Hydrogen Examples/Hydrogen Examples/Examples/Components/Modding Support/hModSupport.unity
+    path: Assets/_TEMP/Modding Support/hModSupport.unity
