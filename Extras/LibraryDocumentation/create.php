@@ -173,7 +173,7 @@ foreach($frameworks as $framework)
 }
 
 // Create Source File
-file_put_contents(RELEASE_PATH . "Unity.source", '<?xml version="1.0"?><monodoc><node label="C#" name="lang-cs" parent="languages">' . $source_nodes . '</node>' . $source_providers . '</monodoc>');
+file_put_contents(RELEASE_PATH . "Unity.source", '<?xml version="1.0"?><monodoc><node label="Unity" name="Unity">'. $source_nodes . '</node>' .  $source_providers . '</monodoc>');
 		
 echo "DONE\n\r";
 
