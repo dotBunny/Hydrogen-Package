@@ -142,6 +142,7 @@ function parseDocumentation($unity_path)
 	
 	// TODO
 	// Maybe parse links to SEE.namescape
+	// //source/@path
 	
 	return $return_array;
 }

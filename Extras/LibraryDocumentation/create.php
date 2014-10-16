@@ -140,36 +140,85 @@ foreach($frameworks as $framework)
 
 }
 
-die();
 
 
+echo "\n\r===[ Stage 4 - Combine Documentation ]===\n\r";
 
+foreach($frameworks as $framework)
+{	
+	echo $framework . "... ";
 	
+	$framework_name = str_replace(".dll", "", $framework);
+	
+	// Combine documentation
+	exec("/usr/bin/mdassembler --ecma " . SOURCE_PATH . $framework_name . "/" . " --out " . RELEASE_PATH . $framework_name . " > " . LOG_PATH . "mdassembler.log");	
+	
+	echo "DONE.\n\r";
+}
 
+echo "\n\r===[ Stage 5 - Create Source File ]===\n\r";
 
+$source_nodes = "";
+$source_providers = "";
 
-
-// Combine documentation
-exec("/usr/bin/mdassembler --ecma " . SOURCE_PATH . " --out " . RELEASE_PATH . "Unity > " . LOG_PATH . "mdassembler.log");		
+foreach($frameworks as $framework)
+{	
+	
+	$framework_name = str_replace(".dll", "", $framework);
+	
+	$source_nodes .= '<node label="' . $framework_name . '" name="' . $framework_name . '" />';
+	$source_providers .= '<source provider="ecma" basefile="' . $framework_name .'" path="Unity" />';
+	
+	
+}
 
 // Create Source File
-file_put_contents(RELEASE_PATH . "Unity.source", '<?xml version="1.0"?>
-<monodoc>
-  <node label="Unity" name="Unity" parent="libraries" />
-  <source provider="ecma" basefile="Unity" path="Unity" />
-</monodoc>');
+file_put_contents(RELEASE_PATH . "Unity.source", '<?xml version="1.0"?><monodoc><node label="C#" name="lang-cs" parent="languages">' . $source_nodes . '</node>' . $source_providers . '</monodoc>');
+		
+echo "DONE\n\r";
 
-// Export VS Compatible Docs
-exec("/usr/bin/monodocs2slashdoc " . SOURCE_PATH . " --out=" . RELEASE_PATH . "Unity.xml");
+echo "\n\r===[ Stage 6 - Create Visual Studio XML ]===\n\r";
 
-// Move Release to Folders
+
+foreach($frameworks as $framework)
+{	
+	echo $framework . "... ";
+	
+	$framework_name = str_replace(".dll", "", $framework);
+	
+	
+	// Export VS Compatible Docs
+	exec("/usr/bin/monodocs2slashdoc " . SOURCE_PATH . $framework_name . " --out=" . RELEASE_PATH . $framework_name . ".xml");
+	
+	echo "DONE\n\r";
+}
+	
+
+echo "\n\r===[ Stage 7 - Move Things! ]===\n\r";
+
 mkdir(RELEASE_PATH . "MonoDevelop");
 mkdir(RELEASE_PATH . "VS");
-rename(RELEASE_PATH . "Unity.tree", RELEASE_PATH . "MonoDevelop/Unity.tree");
+
+foreach($frameworks as $framework)
+{	
+	echo $framework . "... ";
+	
+	$framework_name = str_replace(".dll", "", $framework);
+	
+	
+	rename(RELEASE_PATH . $framework_name . ".xml", RELEASE_PATH . "VS/" . $framework_name . ".xml");
+	rename(RELEASE_PATH . $framework_name . ".tree", RELEASE_PATH . "MonoDevelop/". $framework_name . ".tree");
+//	rename(RELEASE_PATH . $framework_name . ".source", RELEASE_PATH . "MonoDevelop/". $framework_name . ".source");
+	rename(RELEASE_PATH . $framework_name . ".zip", RELEASE_PATH . "MonoDevelop/" .$framework_name . ".zip");
+	
+	echo "DONE\n\r";
+}
+
 rename(RELEASE_PATH . "Unity.source", RELEASE_PATH . "MonoDevelop/Unity.source");
-rename(RELEASE_PATH . "Unity.zip", RELEASE_PATH . "MonoDevelop/Unity.zip");
-rename(RELEASE_PATH . "Unity.xml", RELEASE_PATH . "VS/Unity.xml");
+
+if ( DEBUG ) {
 
 print "\nCounts\n";
 print_r($counts);
 print "\n";
+}
