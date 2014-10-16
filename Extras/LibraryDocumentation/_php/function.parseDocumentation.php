@@ -32,208 +32,116 @@
 function parseDocumentation($unity_path)
 {
 	$documentation_file = @file_get_contents($unity_path, "r"); 
-	
-	// Make our DOM holder for the documentation
-	$documentation_xml = new DOMDocument();
-	$documentation_xml->loadHTML($documentation_file);
-	
-	// Create our XPath finder
-	$summary_finder = new DomXPath($documentation_xml);
 
-	// The summary block of text has the class of "first" in Unity documentation
-	$summery_nodes = $summary_finder->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' first ')]");	
+	// --- First Pass Description ---
+    $description_start = strpos($documentation_file, '<div class="subsection"><h2>Description</h2>');
 	
-	// Make a holder DOM as we might be assembling a string here - this covers having two "first" but isnt a good method
-	//$summary_DOM = new DOMDocument(); 
-	
-	foreach ($summery_nodes as $node) 
-    {
-    	// This makes sure we only get the very last Summary (first)
-    	$summary_DOM = new DOMDocument();
-    	$summary_DOM->appendChild($summary_DOM->importNode($node,true));
-    }
- 
-    // Clean up the summary
-    $summary_text = trim(strip_tags($summary_DOM->saveHTML())); 
-	
-
-	
-	// Handle Subsection Remarks (Pain IN THE Butt!)
-	$remarks_finder = new DomXPath($documentation_xml);
-	$remarks_elements = $remarks_finder->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' subsection ')]");	
-	$found_summary = false;
-	$remarks_text = "";
-	$returns_text = "";
-	
-	$params = array();
-	foreach ($remarks_elements as $element) 
-    {
-	    $node_content = "";
+	if ( $description_start > 0 ) {
 	    
-    
-	    $returns_flag = false;
-	   
-	    // Assemble Content (with a space!)
-	    foreach ($element->childNodes as $node) 
-	    { 
-	     	if($node->hasAttributes()) 
-			{ 
-				$attributes = $node->attributes; 
-				if(!is_null($attributes)) 
-				{ 
-					$force_continue = false;
-					
-					foreach ($attributes as $index=>$attr) 
-					{ 
-						//echo $attr->name."=\"".$attr->value."\"\n\n";
-						
-						// Function Signature
-						if (  
-							($attr->name == "class" && $attr->value == "sigContainer") ||
-							($attr->name == "class" && $attr->value == "sigBlockJS") ||
-							($attr->name == "class" && $attr->value == "sigBlockBoo") ||
-							($attr->name == "class" && $attr->value == "sigBlockCS"))
-						{
-						
-							$force_continue = true;
-							break;
-						}
-						
-						// Parameters - We'll handle these a special way later
-						if ($attr->name == "class" && $attr->value == "parameters")
-						{
-							
-							foreach ($node->childNodes as $parameter_row) 
-							{
-								foreach($parameter_row->childNodes as $parameter_cell)
-								{
-									if ( $parameter_cell->nodeName == "tr" || $parameter_cell->nodeName == "#text" || empty($parameter_cell->nodeValue)) 
-									{ 
-										
-									}
-									else 
-									{
-										$params[] = (string)$parameter_cell->nodeValue;
-									}
+	    // Bump Start Up
+	    $description_start += strlen('<div class="subsection"><h2>Description</h2><p>');
+	    
+	    // Find End
+	    $description_end = strpos($documentation_file, '</div>', $description_start);
+	    
+	    // Capture
+	 	$summary_text = substr($documentation_file, $description_start, $description_end - $description_start);
+	}
+	
+	// --- First Pass Remarks ---
+	$remarks_start = strpos($documentation_file, '<div class="subsection"><p>', $description_end);
+	
+	if ( $remarks_start > 0 ) {
+		
+		// Bump Start Up
+	    $remarks_start += strlen('<div class="subsection">');
+	    
+	     // Find End
+	    $remarks_end = strpos($documentation_file, '</div>', $remarks_start);
+	    
+	    // Capture
+	 	$remarks_text = substr($documentation_file, $remarks_start, $remarks_end - $remarks_start);
+	 	
+	 	$remarks_text = str_replace("<p>", "<para>", $remarks_text);
+	 	$remarks_text = str_replace("</p>", "</para>", $remarks_text);
+	}
+	
+	// --- First Pass Example ---
+	$example_start = strpos($documentation_file, '<div class="subsection"><pre class="codeExampleCS">');
+	if ( $example_start > 0 ) {
 
-								}
-							}
-							$force_continue = true;
-							break;
-						}
-						
-						if ($found_summary && $attr->name == "class" && $attr->value == "first")
-						{
-							$force_continue = true;
-							break;
-						}
-						
+		// Bump Start Up
+		$example_start += strlen('<div class="subsection"><pre class="codeExampleCS">');
+		
+		 // Find End
+	    $example_end = strpos($documentation_file, '</pre>', $example_start);
+	    
+	    $example_text = substr($documentation_file, $example_start, $example_end - $example_start);
+	}
+	
+	// Half assed return fix
+	if ( substr($summary_text, 0, 7) == "Returns" ) {
+		$returns_text = substr($summary_text, 7);
+	}
+		
+	// Handle Parameters
+	$parameters_start = strpos($documentation_file, '<div class="subsection"><h2>Parameters</h2>');
+	if ( $parameters_start > 0 ) {
+		// Bump Start Up
+		$parameters_start += strlen('<div class="subsection"><h2>Parameters</h2>');
+		
+		$parameters_end = strpos($documentation_file, '</div>', $parameters_start);
+		
+		$parameters_raw = substr($documentation_file, $parameters_start, $parameters_end - $parameters_start);
+		
+		$parameters_array = array();
+		
+		$parameters_raw = str_replace('</td>', 'HYDROGEN_SEPERATOR', $parameters_raw);
+		
+		if ( strpos($parameters_raw, ',') > 0) {
+			$parameters_raw = scrubFile($parameters_raw);
 
-						if ( $attr->name == "class" && $attr->value == "codeExampleRaw" )
-						{
-							$force_continue = true;
-							break;
-						}
-					} 
-					if ( $force_continue ) continue;
-				} 
-			} 
+			$parameters_explode = explode( "HYDROGEN_SEPERATOR", $parameters_raw);
 			
-			// Titles
-			if ( $node->nodeValue == "Description" || $node->nodeValue == "Parameters") continue;
-	    
-	    	// Check if its a return value
-		    if ( !$returns_flag && $node->nodeName == "strong" && $node->nodeValue == "Returns" )
-		    {
-			    $returns_flag = true;
-			    continue;
-		    }
-
-		    
-		    if ( $node->nodeName == "img" )
-		    {
-		    	// Don't exactly like doing this, but seems to be the best way to remove stuff without having lots of extra text showing up.
-			    break;
-		    }
-		   
-			// Make sure we dont get any code (as best we can)
-	    	if ( $node->nodeName != "pre" && !$returns_flag)
-	    	{
-	    		$node_content .= trim(strip_tags($node->nodeValue)) . " "; 
-	    	}
-	    	
-	    	// Handle Return Content
-	    	if ($returns_flag && !empty($node->nodeValue) && (substr_count($node->nodeValue, " ") > 0 ))
-		    {
-			    $returns_text .= trim(strip_tags($node->nodeValue)) . " ";
-		    }
-	    }
-	    
-	    if ( $found_summary && (strlen($node_content) > 0) && !$returns_flag )
-	    {
-		   $remarks_text .= trim(strip_tags($node_content));
-	    }
-	    
-	    if ( !empty($summary_text) && stristr($node_content, $summary_text))
-		{
-			$found_summary = true;
+			array_pop($parameters_explode);
+			
+			$parameter_count = count($parameters_explode);
+			
+			for ($i = 0; $i < ($parameter_count); $i += 2) {
+				$parameters_array[] = array("name" => scrubText($parameters_explode[$i]), "description" => scrubText($parameters_explode[$i+1]));	
+			}
 		}
+
+
+					
 	}
-	
-	// Create our XPath finder
-	$note_finder = new DomXPath($documentation_xml);
 
-	// The summary block of text has the class of "first" in Unity documentation
-	$note_nodes = $note_finder->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' note ')]");	
+	// Data Based Returns
+	if ( !empty($parameters_array)) {
+		$return_array['parameters'] = $parameters_array;		
+	} 
 	
-	// Make a holder DOM as we might be assembling a string here
-	$note_DOM = new DOMDocument(); 
-	foreach ($note_nodes as $node) 
-    {
-    	$note_DOM->appendChild($note_DOM->importNode($node,true));
-    }
- 
-    // Add notes to the remarks
-    $remarks_text .= " " . trim(strip_tags($note_DOM->saveHTML())); 
-
-    
-    $example_text = "";    
-    $example_finder = new DomXPath($documentation_xml);
-    
-    // The summary block of text has the class of "first" in Unity documentation
-	$example_nodes = $example_finder->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' codeExampleRaw ')]");	
-    
-    // Make a holder DOM as we might be assembling a string here
-	$example_DOM = new DOMDocument(); 
-	foreach ($example_nodes as $node) 
-    {
-    	$example_DOM->appendChild($example_DOM->importNode($node,true));
+		
+    // Text Based Returns 
+    if ( !empty($remarks_text) ) {
+		$return_array['remarks'] = scrubText($remarks_text);	    
     }
     
-    // Add example to the remarks
-    $example_text = trim(strip_tags(str_replace("\r", "\n", $example_DOM->saveHTML())));     
+    if (!empty($summary_text) ) {
+		$return_array['summary'] = scrubText($summary_text);	    
+    }
     
-    // Make sure we have a clean return array
-    $return_array = array();
+    if (!empty($returns_text ) ) {
+		$return_array['returns'] = scrubText($returns_text);	    
+    }
     
+    if (!empty($example_text) ) {
+	   	$return_array['example'] = scrubText($example_text); 
+    }
 
-	// Parameters
-	if ( count($params) > 0 )
-	{
-	    $parsed_params = array();
-	    for($y = 0; $y < count($params); $y = $y + 2)
-	    {
-	    	$parsed_params[scrubText((string)$params[$y])] = scrubText((string)$params[$y + 1]);
-	    }
-	    
-	    $return_array['parameters'] = $parsed_params;
-	}
- 
-    // Sanitize Our Content
-	$return_array['remarks'] = scrubText($remarks_text);
-	$return_array['summary'] = scrubText($summary_text);
-	$return_array['returns'] = scrubText($returns_text);
-	$return_array['example'] = scrubText($example_text);
+	
+	// TODO
+	// Maybe parse links to SEE.namescape
 	
 	return $return_array;
 }

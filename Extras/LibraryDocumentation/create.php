@@ -5,7 +5,7 @@
 // Author:
 //   Matthew Davey <matthew.davey@dotbunny.com>
 //
-// Copyright (c) 2013 dotBunny Inc. (http://www.dotbunny.com)
+// Copyright (c) 2014 dotBunny Inc. (http://www.dotbunny.com)
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -39,11 +39,11 @@ require_once("_php/function.parseDocumentation.php");
 // =================================================================================
 
 // This will be used if a new function is found as the version it was added in
-define("DOC_SINCE", "4.3.0f4");
+define("DOC_SINCE", "5.0.0b8");
 
 // Reference Paths
-define("FRAMEWORKS_PATH", "/Applications/Unity_4.3.0f4/Unity.app/Contents/Frameworks/Managed/");
-define("SCRIPTREFERENCE_PATH","/Applications/Unity_4.3.0f4/Documentation/ScriptReference/");
+define("FRAMEWORKS_PATH", "/Applications/Unity_5.0.0b8/Unity.app/Contents/Frameworks/Managed/");
+define("SCRIPTREFERENCE_PATH","/Applications/Unity_5.0.0b8/Documentation/html/en/ScriptReference/");
 
 // =================================================================================
 //            No Settings Below This Line --- Change At Your Own Risk
@@ -72,29 +72,82 @@ mkdir(LOG_PATH);
 deleteDir(RELEASE_PATH);
 mkdir(RELEASE_PATH);
 
-// Execute Parse/Update of Actual Libraries
-//FRAMEWORKS_PATH . "UnityEditor.dll
-exec("/usr/bin/monodocer -path: " . SOURCE_PATH . " -since:" . DOC_SINCE . " -pretty > " . LOG_PATH . "monodocer.log -assembly: " . FRAMEWORKS_PATH . "UnityEngine.dll " . FRAMEWORKS_PATH . "UnityEditor.dll");
+// Find Framework Libraries To Deal With
+$frameworks = findUnityFrameworks();
 
-// Generate Content from Documentation
-$XML = simplexml_load_file(BASE_PATH . SOURCE_PATH . "index.xml");
+echo "===[ Stage 1 - Dump Unity Framework Definitions ]===\n\r";
+
+foreach($frameworks as $framework)
+{
+	echo $framework . "... ";
 	
-// Create Link Map before going through documentation
-foreach( $XML->Types->Namespace as $NamespaceObject)
-{
-	foreach ($NamespaceObject->Type as $TypeObject)
-	{		
-		$unity[strtolower((string)$NamespaceObject['Name'])][strtolower((string)$TypeObject['Name'])] = (string)$TypeObject['Kind'];
+	$framework_name = str_replace(".dll", "", $framework);
+	
+	if ( !is_dir(SOURCE_PATH . $framework_name) ) {
+		mkdir(SOURCE_PATH . $framework_name);
 	}
+
+	exec("/usr/bin/monodocer -path: " . SOURCE_PATH . $framework_name . " -since:" . DOC_SINCE . " -pretty > " . LOG_PATH . "monodocer.log -assembly: " . FRAMEWORKS_PATH . 	$framework);
+	
+	echo "DONE\n\r";
 }
 
-foreach( $XML->Types->Namespace as $NamespaceObject)
-{
-	foreach ($NamespaceObject->Type as $TypeObject)
-	{	
-		updateDocumentation($NamespaceObject['Name'], $TypeObject['Name'], strip_tags($TypeObject['Kind']));
+
+echo "\n\r===[ Stage 2 - Create Type Map ]===\n\r";
+
+foreach($frameworks as $framework)
+{	
+	echo $framework . "... ";
+	
+	$framework_name = str_replace(".dll", "", $framework);
+	
+	// Generate Content from Documentation
+	$XML = simplexml_load_file(BASE_PATH . SOURCE_PATH . $framework_name . "/index.xml");
+	
+	// Create Type Map before going through documentation
+	foreach( $XML->Types->Namespace as $NamespaceObject)
+	{
+		foreach ($NamespaceObject->Type as $TypeObject)
+		{		
+			$unity[strtolower((string)$NamespaceObject['Name'])][strtolower((string)$TypeObject['Name'])] = (string)$TypeObject['Kind'];
+		}
 	}
+	
+	echo "DONE.\n\r";
+
 }
+
+echo "\n\r===[ Stage 3 - Scrape Documentation ]===\n\r";
+
+foreach($frameworks as $framework)
+{	
+	echo $framework . "... ";
+	
+	$framework_name = str_replace(".dll", "", $framework);
+	
+	// Generate Content from Documentation
+	$XML = simplexml_load_file(BASE_PATH . SOURCE_PATH . $framework_name . "/index.xml");
+	
+	foreach( $XML->Types->Namespace as $NamespaceObject)
+	{
+		foreach ($NamespaceObject->Type as $TypeObject)
+		{	
+			updateDocumentation($framework_name, $NamespaceObject['Name'], $TypeObject['Name'], strip_tags($TypeObject['Kind']));
+		}
+	}
+	
+	echo "DONE.\n\r";
+
+}
+
+die();
+
+
+
+	
+
+
+
 
 // Combine documentation
 exec("/usr/bin/mdassembler --ecma " . SOURCE_PATH . " --out " . RELEASE_PATH . "Unity > " . LOG_PATH . "mdassembler.log");		

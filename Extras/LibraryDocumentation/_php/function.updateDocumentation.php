@@ -29,7 +29,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-function updateDocumentation($namespace, $type, $name)
+function updateDocumentation($framework_name, $namespace, $type, $name)
 {	
 	global $errors;
 	global $warnings;
@@ -40,7 +40,7 @@ function updateDocumentation($namespace, $type, $name)
 	$parsedData = array();
 	
 	// Load XML Doc Template
-	$objectXML = simplexml_load_file(BASE_PATH . SOURCE_PATH . $namespace . "/" . $type . ".xml");
+	$objectXML = simplexml_load_file(BASE_PATH . SOURCE_PATH . $framework_name . "/" . $namespace . "/" . $type . ".xml");
 
 	// Check Unity Pathing
 	$unity_path = findUnityPath($type);
@@ -56,6 +56,7 @@ function updateDocumentation($namespace, $type, $name)
 	}
 	
 	$parsedData = parseDocumentation($unity_path);
+	
   
 	if ( DEBUG ) echo "\n\n==========================\n" . strtoupper($name) . ": " .$type . "\n==========================\nSummary: " . $parsedData['summary'] . "\nRemarks: " . $parsedData['remarks'] . "\nParameters\n" . print_r($parsedData['parameters']) . "\nExample: " . $parsedData['example'] . "\nReturns: " . $parsedData['returns'] . "\n";	;	
 
@@ -141,7 +142,10 @@ function updateDocumentation($namespace, $type, $name)
 			$parsedData = parseDocumentation($unity_member_path);
 			
 			
-			if ( DEBUG ) echo "\n-----------------\n" . strtoupper($name) . " MEMBER: " . $MemberObject["MemberName"] . "\n-----------------\nSummary: " . $parsedData['summary'] . "\nRemarks: " . $parsedData['remarks'] . "\nParameters\n" . print_r($parsedData['parameters']) . "\nExample: " . $parsedData['example'] . "\nReturns: " . $parsedData['returns'] . "\n";	
+			if ( DEBUG ) 
+			{
+				echo "\n-----------------\n" . strtoupper($name) . " MEMBER: " . $MemberObject["MemberName"] . "\n-----------------\nSummary: " . $parsedData['summary'] . "\nRemarks: " . $parsedData['remarks'] . "\nParameters\n" . print_r($parsedData['parameters']) . "\nExample: " . $parsedData['example'] . "\nReturns: " . $parsedData['returns'] . "\n";	
+			}
 			
 			if ( empty( $parsedData['summary']) )
 			{
@@ -187,7 +191,8 @@ function updateDocumentation($namespace, $type, $name)
 						// Makes a new param (not what we want)
 						$newObject = $MemberObject->Docs->addChild("param", $parsedData["parameters"][(string)$DocParamObject["name"]]);
 						$newObject->addAttribute("name", (string)$DocParamObject["name"]);
-						$newObject->addAttribute("hydrogen_parameter_tag", "true");		
+						$newObject->addAttribute("hydrogen_parameter_tag", "true");	
+	
 							
 						// Flag For Removal
 						$DocParamObject["name"] = "DELETEME";	
@@ -203,5 +208,5 @@ function updateDocumentation($namespace, $type, $name)
 
 
 	// Save File
-	file_put_contents(BASE_PATH . SOURCE_PATH . $namespace . "/" . $type . ".xml",  trim(cleanUpParameters($objectXML->asXML())));
+	file_put_contents(BASE_PATH . SOURCE_PATH . $framework_name . "/" . $namespace . "/" . $type . ".xml",  trim(cleanUpParameters($objectXML->asXML())));
 }

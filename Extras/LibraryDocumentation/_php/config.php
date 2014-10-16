@@ -34,18 +34,21 @@
 define("DOC_EMPTY", "To be added.");
 define("DOC_OVERWRITE", true);
 define("SHOW_WARNINGS", true);
-define("DEBUG", true);
+define("DEBUG", false);
 
 // Our Paths
 define("SOURCE_PATH", "Source/");
 define("LOG_PATH", "Logs/");
 define("RELEASE_PATH", "Release/");
 
+ini_set('memory_limit', '512M');
+
 $allowed_tags = array('see');
 
 $hot_links = array (
 	'character controller' => "UnityEngine.CharacterController",
 	'rigidbody' => "UnityEngine.Rigidbody",
+	'rigidbody2d' => "UnityEngine.Rigidbody2D",
 	'rigidbodies' => "UnityEngine.Rigidbody",
 	'MonoBehaviour' => "UnityEngine.MonoBehaviour",
 	);

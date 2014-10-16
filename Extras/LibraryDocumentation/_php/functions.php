@@ -40,8 +40,35 @@ function scrubText($text)
 	
 	$text = str_replace("  ", " ", $text);
 
+	$text = str_replace("<p>", "", $text);
+	$text = str_replace("</p>", "", $text);
 		
 	return trim($text);
+}
+
+function findUnityFrameworks()
+{
+	$frameworks_folder = scandir(FRAMEWORKS_PATH);
+	$frameworks = array();
+	
+	for($x = 0; $x < count($frameworks_folder); $x++)
+	{
+		if ( 	
+		
+			(substr($frameworks_folder[$x], 0, 6) == "Unity." || 
+			substr($frameworks_folder[$x], 0, 11) == "UnityEngine" || 
+			substr($frameworks_folder[$x], 0, 11) == "UnityEditor") 
+			
+			&& !stristr($frameworks_folder[$x], ".mdb") 
+			&& stristr($frameworks_folder[$x], ".dll" )
+		)
+		{
+			// Add Framework 
+			$frameworks[] = $frameworks_folder[$x];
+		}
+	}
+	
+	return $frameworks;
 }
 
 function findUnityPath($type)
