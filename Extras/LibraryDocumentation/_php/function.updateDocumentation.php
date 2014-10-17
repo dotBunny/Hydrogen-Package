@@ -6,7 +6,7 @@
 // Author:
 //   Matthew Davey <matthew.davey@dotbunny.com>
 //
-// Copyright (c) 2013 dotBunny Inc. (http://www.dotbunny.com)
+// Copyright (c) 2014 dotBunny Inc. (http://www.dotbunny.com)
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -88,7 +88,7 @@ function updateDocumentation($framework_name, $namespace, $type, $name)
 		$counts[$name]['returns']++;	
 	}
 	
-	if ( !empty($parsedData['returns'] ) )
+	if ( !empty($parsedData['example'] ) )
 	{
 		$objectXML->Docs->example = $parsedData['example'];	
 		$counts[$name]['example']++;	
@@ -175,7 +175,7 @@ function updateDocumentation($framework_name, $namespace, $type, $name)
 				$counts[$name . '-member']['returns']++;	
 			}
 			
-			if ( !empty($parsedData['returns'] ) )
+			if ( !empty($parsedData['example'] ) )
 			{
 				$MemberObject->Docs->example =  $parsedData['example'];	
 				$counts[$name . '-member']['example']++;	

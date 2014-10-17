@@ -6,7 +6,7 @@
 // Author:
 //   Matthew Davey <matthew.davey@dotbunny.com>
 //
-// Copyright (c) 2013 dotBunny Inc. (http://www.dotbunny.com)
+// Copyright (c) 2014 dotBunny Inc. (http://www.dotbunny.com)
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -46,6 +46,7 @@ function parseDocumentation($unity_path)
 	    
 	    // Capture
 	 	$summary_text = substr($documentation_file, $description_start, $description_end - $description_start);
+	 	$summary_text = scrubHTML($summary_text);
 	}
 	
 	// --- First Pass Remarks ---
@@ -64,6 +65,7 @@ function parseDocumentation($unity_path)
 	 	
 	 	$remarks_text = str_replace("<p>", "<para>", $remarks_text);
 	 	$remarks_text = str_replace("</p>", "</para>", $remarks_text);
+	 	$remarks_text = scrubHTML($remarks_text);
 	}
 	
 	// --- First Pass Example ---
@@ -77,6 +79,7 @@ function parseDocumentation($unity_path)
 	    $example_end = strpos($documentation_file, '</pre>', $example_start);
 	    
 	    $example_text = substr($documentation_file, $example_start, $example_end - $example_start);
+	    $example_text = scrubHTML($example_text);
 	}
 	
 	// Half assed return fix
@@ -99,7 +102,7 @@ function parseDocumentation($unity_path)
 		$parameters_raw = str_replace('</td>', 'HYDROGEN_SEPERATOR', $parameters_raw);
 		
 		if ( strpos($parameters_raw, ',') > 0) {
-			$parameters_raw = scrubFile($parameters_raw);
+			$parameters_raw = scrubHTML($parameters_raw);
 
 			$parameters_explode = explode( "HYDROGEN_SEPERATOR", $parameters_raw);
 			
@@ -108,12 +111,9 @@ function parseDocumentation($unity_path)
 			$parameter_count = count($parameters_explode);
 			
 			for ($i = 0; $i < ($parameter_count); $i += 2) {
-				$parameters_array[] = array("name" => scrubText($parameters_explode[$i]), "description" => scrubText($parameters_explode[$i+1]));	
+				$parameters_array[$parameters_explode[$i]] = scrubText($parameters_explode[$i+1]);	
 			}
-		}
-
-
-					
+		}			
 	}
 
 	// Data Based Returns
@@ -132,7 +132,7 @@ function parseDocumentation($unity_path)
     }
     
     if (!empty($returns_text ) ) {
-		$return_array['returns'] = scrubText($returns_text);	    
+		$return_array['returns'] = ucfirst(scrubText($returns_text));	    
     }
     
     if (!empty($example_text) ) {

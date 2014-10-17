@@ -39,11 +39,11 @@ require_once("_php/function.parseDocumentation.php");
 // =================================================================================
 
 // This will be used if a new function is found as the version it was added in
-define("DOC_SINCE", "5.0.0b8");
+define("DOC_SINCE", "5.0.0b9");
 
 // Reference Paths
-define("FRAMEWORKS_PATH", "/Applications/Unity_5.0.0b8/Unity.app/Contents/Frameworks/Managed/");
-define("SCRIPTREFERENCE_PATH","/Applications/Unity_5.0.0b8/Documentation/html/en/ScriptReference/");
+define("FRAMEWORKS_PATH", "/Applications/Unity_5.0.0b9/Unity.app/Contents/Frameworks/Managed/");
+define("SCRIPTREFERENCE_PATH","/Applications/Unity_5.0.0b9/Documentation/html/en/ScriptReference/");
 
 // =================================================================================
 //            No Settings Below This Line --- Change At Your Own Risk
@@ -205,10 +205,8 @@ foreach($frameworks as $framework)
 	
 	$framework_name = str_replace(".dll", "", $framework);
 	
-	
 	rename(RELEASE_PATH . $framework_name . ".xml", RELEASE_PATH . "VS/" . $framework_name . ".xml");
 	rename(RELEASE_PATH . $framework_name . ".tree", RELEASE_PATH . "MonoDevelop/". $framework_name . ".tree");
-//	rename(RELEASE_PATH . $framework_name . ".source", RELEASE_PATH . "MonoDevelop/". $framework_name . ".source");
 	rename(RELEASE_PATH . $framework_name . ".zip", RELEASE_PATH . "MonoDevelop/" .$framework_name . ".zip");
 	
 	echo "DONE\n\r";

@@ -6,7 +6,7 @@
 // Author:
 //   Matthew Davey <matthew.davey@dotbunny.com>
 //
-// Copyright (c) 2013 dotBunny Inc. (http://www.dotbunny.com)
+// Copyright (c) 2014 dotBunny Inc. (http://www.dotbunny.com)
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -44,6 +44,15 @@ function scrubText($text)
 	$text = str_replace("</p>", "", $text);
 		
 	return trim($text);
+}
+function scrubHTML($file)
+{
+	// Strip Newlines
+	$file = str_replace("\n", "", $file);
+	
+	$file = strip_tags($file, '<p><para>');
+	
+	return $file;
 }
 
 function findUnityFrameworks()
@@ -127,19 +136,22 @@ function findUnityMemberPath($type, $member)
 function cleanUpParameters($file)
 {
 	$file = str_replace(" hydrogen_parameter_tag=\"true\"", "", $file);
-	$file = str_replace("<param name=\"DELETEME\">To be added.</param>\n", "", $file);
+	$file = str_replace("<param name=\"DELETEME\">To be added.</param>\n", "", $file);	
+	
+	$param_hint = "<param name=\"DELETEME\">";
+	while(stripos($file, $param_hint) > 0) {
+		$start = stripos($file, $param_hint);
+		$end = stripos($file, "</param>", $start + strlen($param_hint));
+		$target = substr($file, $start, $end - $start);
+		$file = str_replace($target, "", $file);
+	}
+
+	$file = str_replace("&lt;para&gt;", "<para>", $file);
+	$file = str_replace("&lt;/para&gt;", "</para>", $file);
 	
 	return $file;
 }
-function scrubFile($file)
-{
-	// Strip Newlines
-	$file = str_replace("\n", "", $file);
-	
-	$file = strip_tags($file, '<p><span><a><h3>');
-	
-	return $file;
-}
+
 
 function deleteDir($path)
 {
