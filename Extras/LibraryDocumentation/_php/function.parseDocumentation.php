@@ -120,7 +120,6 @@ function parseDocumentation($unity_path)
 	if ( !empty($parameters_array)) {
 		$return_array['parameters'] = $parameters_array;		
 	} 
-	
 		
     // Text Based Returns 
     if ( !empty($remarks_text) ) {
@@ -142,6 +141,7 @@ function parseDocumentation($unity_path)
 	
 	// TODO
 	// Maybe parse links to SEE.namescape
+	// TODO " value ? for properties? <- same as summary
 	// //source/@path
 	
 	return $return_array;

@@ -50,7 +50,7 @@ function scrubHTML($file)
 	// Strip Newlines
 	$file = str_replace("\n", "", $file);
 	
-	$file = strip_tags($file, '<p><para>');
+	$file = strip_tags($file, '<p><para><see>');
 	
 	return $file;
 }
